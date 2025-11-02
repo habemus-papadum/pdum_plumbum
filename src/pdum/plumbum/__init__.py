@@ -13,10 +13,9 @@ from .async_pipeline import (
     AsyncPbFunc,
     AsyncPbPair,
     apb,
-    ensure_async_pb,
-    wrap_sync_as_async,
 )
-from .core import Pb, PbFunc, PbPair, pb
+from .core import Pb, PbFunc, PbPair, pb, to_f
+from .iterops import select, where
 
 __version__ = "0.1.0-alpha"
 
@@ -26,12 +25,11 @@ __all__ = [
     "PbFunc",
     "PbPair",
     "pb",
+    "to_f",
     "AsyncPb",
     "AsyncPbFunc",
     "AsyncPbPair",
     "apb",
-    "ensure_async_pb",
-    "wrap_sync_as_async",
     "AsyncIterPb",
     "AsyncIterPbFunc",
     "AsyncIterPbPair",
@@ -39,5 +37,6 @@ __all__ = [
     "ensure_async_iter_pb",
     "to_async_iter",
     "iterops",
-    "aiterops",
+    "select",
+    "where",
 ]

@@ -202,6 +202,43 @@ op = op(3)             # Add c=3
 result = 10 >> op      # 10 + 1 + 2 + 3 = 16
 ```
 
+### Iterable Helpers (`select` and `where`)
+
+Use the built-in iterable operators to transform and filter collections without
+dropping out of pipeline composition:
+
+```python
+from pdum.plumbum import pb, select, where, to_f
+
+# Transform every item in an iterable
+double_values = select(lambda value: value * 2)
+list([1, 2, 3] >> double_values)
+# [2, 4, 6]
+
+# Keep only values that satisfy a predicate
+only_evens = where(lambda value: value % 2 == 0)
+list([1, 2, 3, 4, 5] >> only_evens)
+# [2, 4]
+
+# Compose transformations and filters
+normalize = select(lambda value: value + 1) | where(lambda value: value % 2 == 0)
+list([1, 2, 3, 4] >> normalize)
+# [2, 4]
+
+# Embed a pipeline as a function using the > to_f marker
+@pb
+def add_one(value: int) -> int:
+    return value + 1
+
+@pb
+def mul_two(value: int) -> int:
+    return value * 2
+
+combine = select(add_one | mul_two > to_f) | where(lambda value: value % 2 == 0)
+list([1, 2, 3, 4] >> combine)
+# [4, 6, 8, 10]
+```
+
 ### Plain Functions as Operators
 
 Functions are automatically wrapped when used in pipelines:

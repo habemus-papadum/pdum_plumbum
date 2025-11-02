@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from pdum.plumbum import AsyncPbPair, aipb, apb, ensure_async_iter_pb, ensure_async_pb, pb
+from pdum.plumbum import AsyncPbPair, aipb, apb, ensure_async_iter_pb, pb
 
 
 @pb
@@ -48,13 +48,6 @@ async def test_async_pair_repr():
     assert "async" in repr(pair)
     result = await (5 >> pair)
     assert result == 20
-
-
-@pytest.mark.asyncio
-async def test_ensure_async_pb_with_callable():
-    op = ensure_async_pb(lambda x: x + 3)
-    result = await (7 >> op)
-    assert result == 10
 
 
 async def async_source(limit: int = 5):

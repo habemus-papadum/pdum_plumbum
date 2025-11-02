@@ -5,7 +5,7 @@ import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Awaitable, Callable
 
-from .core import Pb
+from .core import Pb, to_f
 
 
 class AsyncPb(ABC):
@@ -17,6 +17,11 @@ class AsyncPb(ABC):
 
     @abstractmethod
     async def __rrshift__(self, data: Any) -> Any: ...
+
+    def __gt__(self, other: Any) -> Callable[[Any], Awaitable[Any]]:
+        if other is to_f:
+            return self.to_async_function()
+        raise NotImplementedError(f"Unsupported operation: {type(self)} > {type(other)}")
 
     def to_async_function(self) -> Callable[[Any], Awaitable[Any]]:
         async def _call(value: Any) -> Any:
@@ -82,16 +87,10 @@ def ensure_async_pb(obj: Any) -> AsyncPb:
     if isinstance(obj, AsyncPb):
         return obj
     if isinstance(obj, Pb):
-        return wrap_sync_as_async(obj)
+        return _SyncToAsyncAdapter(obj)
     if callable(obj):
         return apb(obj)
     raise TypeError(f"Cannot convert {obj!r} to AsyncPb")
-
-
-def wrap_sync_as_async(operator: Pb) -> AsyncPb:
-    if isinstance(operator, AsyncPb):
-        return operator
-    return _SyncToAsyncAdapter(operator)
 
 
 def _wrap_sync_callable(function: Callable[..., Any]) -> Callable[..., Any]:
@@ -115,6 +114,4 @@ __all__ = [
     "AsyncPbFunc",
     "AsyncPbPair",
     "apb",
-    "ensure_async_pb",
-    "wrap_sync_as_async",
 ]
