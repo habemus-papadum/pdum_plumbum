@@ -16,7 +16,7 @@ A plumbing syntax for Python that provides a clear distinction between data and 
 
 ## Tutorial Notebook
 
-Walk through synchronous and asynchronous pipelines step-by-step with the Jupyter notebook at [`docs/tutorial.ipynb`](docs/tutorial.ipynb).
+Walk through synchronous and asynchronous pipelines step-by-step in the [Tutorial](https://habemus-papadum.github.io/pdum_plumbum/tutorial/).
 
 ### Key Features
 
