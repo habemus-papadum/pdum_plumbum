@@ -28,8 +28,8 @@ class AsyncPb(ABC):
 class AsyncPbFunc(AsyncPb):
     def __init__(self, function: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         self.function = function
-        self.args = args
-        self.kwargs = kwargs
+        self.args = tuple(self._normalize(value) for value in args)
+        self.kwargs = {key: self._normalize(value) for key, value in kwargs.items()}
         functools.update_wrapper(self, function)
 
     def __call__(self, *args: Any, **kwargs: Any) -> AsyncPbFunc:
@@ -49,6 +49,14 @@ class AsyncPbFunc(AsyncPb):
 
     def __repr__(self) -> str:
         return f"<async {self.function.__name__}>(*{self.args}, **{self.kwargs})"
+
+    @staticmethod
+    def _normalize(value: Any) -> Any:
+        if isinstance(value, AsyncPb):
+            return value.to_async_function()
+        if isinstance(value, Pb):
+            return ensure_async_pb(value).to_async_function()
+        return value
 
 
 class AsyncPbPair(AsyncPb):
@@ -82,16 +90,10 @@ def ensure_async_pb(obj: Any) -> AsyncPb:
     if isinstance(obj, AsyncPb):
         return obj
     if isinstance(obj, Pb):
-        return wrap_sync_as_async(obj)
+        return _SyncToAsyncAdapter(obj)
     if callable(obj):
         return apb(obj)
     raise TypeError(f"Cannot convert {obj!r} to AsyncPb")
-
-
-def wrap_sync_as_async(operator: Pb) -> AsyncPb:
-    if isinstance(operator, AsyncPb):
-        return operator
-    return _SyncToAsyncAdapter(operator)
 
 
 def _wrap_sync_callable(function: Callable[..., Any]) -> Callable[..., Any]:
@@ -115,6 +117,4 @@ __all__ = [
     "AsyncPbFunc",
     "AsyncPbPair",
     "apb",
-    "ensure_async_pb",
-    "wrap_sync_as_async",
 ]

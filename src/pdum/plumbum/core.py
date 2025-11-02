@@ -16,6 +16,18 @@ class Pb(ABC):
     The primary operators are:
     - `|` (pipe): Combines operators into a pipeline (creates PbPair)
     - `>>` (thread): Threads data through the pipeline
+
+    Coercing an operator or pipeline into a plain callable can be done explicitly
+    via :meth:`Pb.to_function`:
+
+    >>> pipeline = add_one | mul_two
+    >>> as_function = pipeline.to_function()
+    >>> as_function(10)
+    22
+
+    This form mirrors ``Pb.to_function`` but fits naturally into pipeline
+    expressions, enabling constructs like ``select((add_one | double).to_function())``
+    to embed synchronous pipelines inside iterable operators.
     """
 
     def __or__(self, other: "Pb | Any") -> "Pb":
@@ -48,8 +60,8 @@ class PbPair(Pb):
 
 class PbFunc(Pb):
     def __init__(self, function, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
+        self.args = tuple(self._normalize(value) for value in args)
+        self.kwargs = {key: self._normalize(value) for key, value in kwargs.items()}
         self.function = function
         functools.update_wrapper(self, function)
 
@@ -71,6 +83,12 @@ class PbFunc(Pb):
             self.args,
             self.kwargs,
         )
+
+    @staticmethod
+    def _normalize(value: Any) -> Any:
+        if isinstance(value, Pb):
+            return value.to_function()
+        return value
 
 
 def pb(function):
