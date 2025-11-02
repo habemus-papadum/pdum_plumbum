@@ -19,7 +19,7 @@ from .async_pipeline import (
 )
 from .core import Pb, PbFunc, PbPair, pb
 
-__version__ = "0.2.0-alpha"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
