@@ -2,10 +2,10 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/habemus-papadum/pdum_plumbum/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                             |    Stmts |     Miss |    Cover |   Missing |
-|--------------------------------- | -------: | -------: | -------: | --------: |
-| src/pdum/plumbum/\_\_init\_\_.py |        2 |        0 |     100% |           |
-|                        **TOTAL** |    **2** |    **0** | **100%** |           |
+| Name                             |    Stmts |     Miss |   Cover |   Missing |
+|--------------------------------- | -------: | -------: | ------: | --------: |
+| src/pdum/plumbum/\_\_init\_\_.py |       50 |       17 |     66% |80, 100, 177, 301, 338-356 |
+|                        **TOTAL** |   **50** |   **17** | **66%** |           |
 
 
 ## Setup coverage badge
