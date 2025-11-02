@@ -4,13 +4,18 @@
 
 | Name                                    |    Stmts |     Miss |   Cover |   Missing |
 |---------------------------------------- | -------: | -------: | ------: | --------: |
-| src/pdum/plumbum/\_\_init\_\_.py        |       16 |        0 |    100% |           |
+| src/pdum/plumbum/\_\_init\_\_.py        |       18 |        0 |    100% |           |
 | src/pdum/plumbum/aiterops.py            |      209 |        2 |     99% |   331-332 |
 | src/pdum/plumbum/aiterops\_internals.py |       71 |        0 |    100% |           |
 | src/pdum/plumbum/async\_pipeline.py     |       76 |        2 |     97% |   86, 112 |
 | src/pdum/plumbum/core.py                |       41 |        0 |    100% |           |
 | src/pdum/plumbum/iterops.py             |      128 |        0 |    100% |           |
-|                               **TOTAL** |  **541** |    **4** | **99%** |           |
+| src/pdum/plumbum/jq/\_\_init\_\_.py     |        6 |        0 |    100% |           |
+| src/pdum/plumbum/jq/async\_operators.py |       50 |        3 |     94% | 22, 33-34 |
+| src/pdum/plumbum/jq/operators.py        |      248 |       52 |     79% |21, 24, 40, 55-57, 64-69, 77, 82-83, 85-89, 96-98, 114-118, 123, 127, 141, 148-149, 153-158, 167, 175, 195, 239, 292, 305, 309, 313, 324, 335, 338, 340, 360-361 |
+| src/pdum/plumbum/jq/paths.py            |      266 |      101 |     62% |43, 46, 48, 76, 79, 87, 93, 106, 109, 132-135, 138-145, 160-162, 171, 179, 186, 212, 216, 222-231, 234-247, 252, 262, 273, 277, 286-298, 303, 307, 311, 316, 319-340, 350, 356-361 |
+| src/pdum/plumbum/jq/typing.py           |       25 |        0 |    100% |           |
+|                               **TOTAL** | **1138** |  **160** | **86%** |           |
 
 
 ## Setup coverage badge
