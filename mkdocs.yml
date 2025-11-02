@@ -1,8 +1,8 @@
 site_name: plumbum
 site_description: A plumbing syntax for Python
 site_author: Nehal Patel
-repo_url: https://github.com/habemus-papadum/plumbum
-repo_name: plumbum
+repo_url: https://github.com/habemus-papadum/pdum_plumbum
+repo_name: pdum_plumbum
 
 theme:
   name: "material"
