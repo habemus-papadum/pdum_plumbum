@@ -12,6 +12,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Tutorial: tutorial.ipynb
   - API: reference.md
 
 # If you'd like to specify a separate docs directory, you can do so here
@@ -20,7 +21,8 @@ docs_dir: docs
 # Plugins to enable
 plugins:
   - search
-  - mkdocs-jupyter
+  - mkdocs-jupyter:
+      execute: true
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -28,3 +30,7 @@ plugins:
           options:
             docstring_style: numpy
             show_submodules: false
+            members: true
+            inherited_members: true
+            filters:
+              - "!^_"

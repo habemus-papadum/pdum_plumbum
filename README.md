@@ -14,6 +14,10 @@ A plumbing syntax for Python that provides a clear distinction between data and 
 
 **This is primarily a syntax library** focused on making data transformations more readable and composable. It is not optimized for performance-critical applications, but rather for clarity and expressiveness in your code.
 
+## Tutorial Notebook
+
+Walk through synchronous and asynchronous pipelines step-by-step with the Jupyter notebook at [`docs/tutorial.ipynb`](docs/tutorial.ipynb).
+
 ### Key Features
 
 - **Clear Operator/Data Distinction**: Define pipelines without executing them

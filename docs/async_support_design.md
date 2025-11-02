@@ -72,9 +72,12 @@ Asynchronous iterables require a distinct execution strategy where iteration its
 
 #### Proposed Structure
 - Define `AsyncIterPb`, `AsyncIterPbFunc`, and `AsyncIterPbPair` mirroring the synchronous iterator semantics but using `async for`.
+- Introduce an `aipb` decorator dedicated to functions whose first parameter consumes an `AsyncIterable`. It should return `AsyncIterPbFunc`, applying the same partial-application model.
 - `AsyncIterPbFunc.__rrshift__` returns an async iterator (likely an async generator) and supports partial application identical to the scalar async types.
-- Provide adapters so `apb` can recognise async generator functions and wrap them in the iterator hierarchy, while still allowing promotion of scalar async operators when composed with iterator pipelines.
+- Provide adapters so `apb` can still promote scalar async operators when composed with iterator pipelines, bridging between single-value and streaming semantics.
 - Consumers explicitly iterate with `async for item in value >> iter_pipeline`.
+
+Having a dedicated decorator clarifies developer intent (streaming vs scalar) and avoids ambiguous auto-detection. Without it, async iterator pipelines would have to guess whether a coroutine should be awaited once or iterated, which is brittle and error-prone. `aipb` makes the contract explicit: the decorated callable consumes an async iterable and returns an async iterable (or value), ensuring the pipeline composes correctly.
 
 #### Interoperability
 - Introduce helpers to bridge scalar async pipelines and iterator pipelines (e.g., wrapping scalar results in single-item async generators, or consuming async iterables to yield final values).
@@ -86,6 +89,6 @@ Build a parallel async pipeline stack and introduce an explicit `apb` decorator 
 ## Next Steps
 1. Prototype `AsyncPb`, `AsyncPbFunc`, and `AsyncPbPair` mirroring the synchronous implementations.
 2. Implement the `apb` decorator, including adaptation logic for synchronous callables used in async pipelines.
-3. Design and prototype the async iterator hierarchy (`AsyncIterPb*`) and the adapters required for interoperability.
+3. Implement the `aipb` decorator and the async iterator hierarchy (`AsyncIterPb*`), plus adapters required for interoperability.
 4. Update documentation and tests to cover async usage patterns (`await (value >> pipeline)` and `async for ... in value >> iter_pipeline`).
 5. Evaluate typing strategy (PEP 484/PEP 544) to expose awaitable return types for async pipelines and iterable variants.

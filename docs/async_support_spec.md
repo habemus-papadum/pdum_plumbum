@@ -5,11 +5,16 @@
 - Provide explicit async operator hierarchies for single-value pipelines and async-iterator pipelines.
 - Support mixing synchronous callables inside async pipelines via adapters.
 
-## New Decorator
+## New Decorators
 - `apb(function)`:
   - If `function` is a coroutine function, return an `AsyncPbFunc`.
   - Otherwise wrap `function` in `async def wrapper(data, *args, **kwargs)` that forwards to `function`, then wrap that wrapper in `AsyncPbFunc`.
   - Preserve `functools.update_wrapper` behaviour for metadata.
+- `aipb(function)`:
+  - Expect `function` to consume an `AsyncIterable` as its first argument (async generator or coroutine returning `AsyncIterable`).
+  - If `function` already yields an async iterator, wrap it in `AsyncIterPbFunc`.
+  - If it is synchronous, adapt it by creating `async def wrapper(data, *args, **kwargs)` that iterates with `async for` over `data`, feeds values into the synchronous function (collecting or yielding as appropriate), then wrap that wrapper in `AsyncIterPbFunc`.
+  - Preserve metadata via `functools.update_wrapper`.
 
 ## Async Scalar Pipeline Types
 - `class AsyncPb(Pb, ABC)`:
@@ -41,6 +46,7 @@
 - `wrap_sync_as_async(pb_instance)` returning an `AsyncPb` that calls the sync operator and returns its result (no implicit threadpool).
 - `wrap_async_scalar_as_iter(async_pb)` returning `AsyncIterPb` that yields a single item.
 - Ensure `apb` + `AsyncPbPair` can combine with legacy `Pb`/`PbPair` by auto-promoting sync operators (but keep original instances reusable).
+- Ensure `aipb` + `AsyncIterPbPair` can combine with scalar async operators by auto-promoting via `wrap_async_scalar_as_iter`.
 
 ## Error Handling & Typing
 - Propagate exceptions naturally through awaited calls.
@@ -52,4 +58,4 @@
 - Provide pytest coverage using `pytest.mark.asyncio`:
   - Scalar pipelines (`await (value >> apb_op)`).
   - Mixed sync/async operators via `apb`.
-  - Async iterator pipelines consumed with `async for`.
+  - Async iterator pipelines consumed with `async for`, including `aipb` scenarios.
