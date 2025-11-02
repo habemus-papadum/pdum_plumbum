@@ -71,7 +71,7 @@ from .iterops import (
     map as iter_map,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0-alpha"
 
 # Re-export module objects for convenience
 iterops = _iterops_module
