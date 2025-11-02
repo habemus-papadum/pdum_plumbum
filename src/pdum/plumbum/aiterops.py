@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections.abc import AsyncIterable, AsyncIterator, Callable
-from typing import Any, Awaitable, TypeVar
+import types
+from collections import abc as collections_abc
+from collections.abc import AsyncIterable, AsyncIterator
+from typing import Any, Awaitable, Callable, TypeVar, get_args, get_origin, get_type_hints
 
 from .async_pipeline import AsyncPb, apb, ensure_async_pb
 from .core import Pb
@@ -38,15 +40,58 @@ def _ensure_async_callable(func: Any) -> Callable[[Any], Awaitable[Any]]:
     return wrapper
 
 
-@apb
-async def aselect(stream: Any, mapper: Callable[[T], Awaitable[U]] | Callable[[T], U]) -> AsyncIterator[U]:
+def _annotation_requires_async_callable(annotation: Any) -> bool:
+    if annotation is inspect._empty:
+        return False
+    if annotation is None:
+        return False
+    origin = get_origin(annotation)
+    if origin in (Callable, collections_abc.Callable):  # type: ignore[attr-defined]
+        return True
+    if origin in (types.UnionType, getattr(types, "UnionType", types.UnionType)):
+        return any(_annotation_requires_async_callable(arg) for arg in get_args(annotation))
+    if origin is None:
+        return False
+    return any(_annotation_requires_async_callable(arg) for arg in get_args(annotation))
+
+
+def async_iter_operator(func: Callable[..., Awaitable[AsyncIterator[Any]]]) -> Callable[..., Any]:
+    signature = inspect.signature(func)
+    parameters = list(signature.parameters.values())
+    if not parameters:
+        raise TypeError("Async iterator operators must accept at least one parameter")
+
+    stream_param = parameters[0].name
+    type_hints = get_type_hints(func, include_extras=True)  # type: ignore[arg-type]
+    async_callable_params = {
+        param.name for param in parameters[1:] if _annotation_requires_async_callable(type_hints.get(param.name))
+    }
+
+    @apb
+    async def wrapper(stream: Any, *args: Any, **kwargs: Any) -> AsyncIterator[Any]:
+        bound = signature.bind(stream, *args, **kwargs)
+        bound.apply_defaults()
+        bound.arguments[stream_param] = await _to_async_iterator(bound.arguments[stream_param])
+        for name in async_callable_params:
+            if name in bound.arguments:
+                bound.arguments[name] = _ensure_async_callable(bound.arguments[name])
+        return await func(*bound.args, **bound.kwargs)
+
+    functools.update_wrapper(wrapper, func)
+    return wrapper
+
+
+@async_iter_operator
+async def aselect(
+    iterator: AsyncIterator[T], mapper: Callable[[T], Awaitable[U]] | Callable[[T], U]
+) -> AsyncIterator[U]:
     """
-    Apply ``mapper`` to each item in an async iterable ``stream``.
+    Apply ``mapper`` to each item in an async iterator.
 
     Parameters
     ----------
-    stream
-        Source async iterable to transform.
+    iterator
+        Source async iterator to transform.
     mapper
         Callable used to transform each element. May return awaitable results.
 
@@ -56,25 +101,24 @@ async def aselect(stream: Any, mapper: Callable[[T], Awaitable[U]] | Callable[[T
         Async iterator yielding the transformed values.
     """
 
-    iterator = await _to_async_iterator(stream)
-    async_mapper = _ensure_async_callable(mapper)
-
     async def _generator() -> AsyncIterator[U]:
         async for item in iterator:
-            yield await async_mapper(item)
+            yield await mapper(item)
 
     return _generator()
 
 
-@apb
-async def awhere(stream: Any, predicate: Callable[[T], Awaitable[bool]] | Callable[[T], bool]) -> AsyncIterator[T]:
+@async_iter_operator
+async def awhere(
+    iterator: AsyncIterator[T], predicate: Callable[[T], Awaitable[bool]] | Callable[[T], bool]
+) -> AsyncIterator[T]:
     """
-    Yield items from an async iterable ``stream`` for which ``predicate`` returns ``True``.
+    Yield items from an async iterator for which ``predicate`` returns ``True``.
 
     Parameters
     ----------
-    stream
-        Source async iterable to filter.
+    iterator
+        Source async iterator to filter.
     predicate
         Callable returning ``True`` for values that should pass through. May return awaitable results.
 
@@ -84,24 +128,21 @@ async def awhere(stream: Any, predicate: Callable[[T], Awaitable[bool]] | Callab
         Async iterator yielding values that satisfy the predicate.
     """
 
-    iterator = await _to_async_iterator(stream)
-    async_predicate = _ensure_async_callable(predicate)
-
     async def _generator() -> AsyncIterator[T]:
         async for item in iterator:
-            if await async_predicate(item):
+            if await predicate(item):
                 yield item
 
     return _generator()
 
 
-@apb
-async def aiter(stream: Any) -> AsyncIterator[Any]:
+@async_iter_operator
+async def aiter(iterator: AsyncIterator[Any]) -> AsyncIterator[Any]:
     """
     Normalize async iterables, iterators, or awaitables into an async iterator.
     """
 
-    return await _to_async_iterator(stream)
+    return iterator
 
 
-__all__ = ["aselect", "awhere", "aiter"]
+__all__ = ["aselect", "awhere", "aiter", "async_iter_operator"]
