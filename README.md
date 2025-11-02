@@ -208,7 +208,7 @@ Use the built-in iterable operators to transform and filter collections without
 dropping out of pipeline composition:
 
 ```python
-from pdum.plumbum import pb, select, where, to_f
+from pdum.plumbum import pb, select, where
 
 # Transform every item in an iterable
 double_values = select(lambda value: value * 2)
@@ -225,7 +225,7 @@ normalize = select(lambda value: value + 1) | where(lambda value: value % 2 == 0
 list([1, 2, 3, 4] >> normalize)
 # [2, 4]
 
-# Embed a pipeline as a function using the > to_f marker
+# Embed a pipeline as a function using to_function()
 @pb
 def add_one(value: int) -> int:
     return value + 1
@@ -234,7 +234,7 @@ def add_one(value: int) -> int:
 def mul_two(value: int) -> int:
     return value * 2
 
-combine = select(add_one | mul_two > to_f) | where(lambda value: value % 2 == 0)
+combine = select(add_one | mul_two) | where(lambda value: value % 2 == 0)
 list([1, 2, 3, 4] >> combine)
 # [4, 6, 8, 10]
 ```

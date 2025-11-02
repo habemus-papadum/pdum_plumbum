@@ -5,15 +5,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 
-class TO_F:
-    """Marker class to indicate conversion to function in pipelines."""
-
-    ...
-
-
-to_f = TO_F()
-
-
 class Pb(ABC):
     """
     Abstract base class for plumbum pipe operations.
@@ -25,19 +16,18 @@ class Pb(ABC):
     The primary operators are:
     - `|` (pipe): Combines operators into a pipeline (creates PbPair)
     - `>>` (thread): Threads data through the pipeline
-    - `>` with ``to_f``: Coerces a pipeline into a reusable function
 
     Coercing an operator or pipeline into a plain callable can be done explicitly
-    with the ``to_f`` marker:
+    via :meth:`Pb.to_function`:
 
     >>> pipeline = add_one | mul_two
-    >>> as_function = pipeline > to_f
+    >>> as_function = pipeline.to_function()
     >>> as_function(10)
     22
 
     This form mirrors ``Pb.to_function`` but fits naturally into pipeline
-    expressions, enabling constructs like ``select(add_one | double > to_f)`` to
-    embed synchronous pipelines inside iterable operators.
+    expressions, enabling constructs like ``select((add_one | double).to_function())``
+    to embed synchronous pipelines inside iterable operators.
     """
 
     def __or__(self, other: "Pb | Any") -> "Pb":
@@ -48,11 +38,6 @@ class Pb(ABC):
 
     @abstractmethod
     def __rrshift__(self, data: Any) -> Any: ...
-
-    def __gt__(self, other: Any) -> Callable[[Any], Any]:
-        if other is to_f:
-            return self.to_function()
-        raise NotImplementedError(f"Unsupported operation: {type(self)} > {type(other)}")
 
     def to_function(self) -> Callable[[Any], Any]:
         def _call(value: Any) -> Any:
@@ -110,4 +95,4 @@ def pb(function):
     return PbFunc(function)
 
 
-__all__ = ["Pb", "PbFunc", "PbPair", "pb", "to_f"]
+__all__ = ["Pb", "PbFunc", "PbPair", "pb"]

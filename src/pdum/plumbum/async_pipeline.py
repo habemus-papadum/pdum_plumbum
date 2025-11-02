@@ -5,7 +5,7 @@ import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Awaitable, Callable
 
-from .core import Pb, to_f
+from .core import Pb
 
 
 class AsyncPb(ABC):
@@ -17,11 +17,6 @@ class AsyncPb(ABC):
 
     @abstractmethod
     async def __rrshift__(self, data: Any) -> Any: ...
-
-    def __gt__(self, other: Any) -> Callable[[Any], Awaitable[Any]]:
-        if other is to_f:
-            return self.to_async_function()
-        raise NotImplementedError(f"Unsupported operation: {type(self)} > {type(other)}")
 
     def to_async_function(self) -> Callable[[Any], Awaitable[Any]]:
         async def _call(value: Any) -> Any:
