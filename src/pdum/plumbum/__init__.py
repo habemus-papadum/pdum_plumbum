@@ -4,7 +4,7 @@ from .async_pipeline import AsyncPb, AsyncPbFunc, AsyncPbPair, apb, ensure_async
 from .core import Pb, PbFunc, PbPair, pb
 from .iterops import select, where
 
-__version__ = "0.3.0-alpha"
+__version__ = "0.3.0"
 
 __all__ = [
     "__version__",
