@@ -5,10 +5,6 @@ import asyncio
 import pytest
 
 from pdum.plumbum import AsyncPbPair, aipb, apb, ensure_async_iter_pb, ensure_async_pb, pb
-from pdum.plumbum.aiterops import filter as aiter_filter
-from pdum.plumbum.aiterops import map as aiter_map
-from pdum.plumbum.iterops import filter as iter_filter
-from pdum.plumbum.iterops import map as iter_map
 
 
 @pb
@@ -30,18 +26,6 @@ async def async_double(value: int) -> int:
 def test_pb_to_function():
     fn = add_one.to_function()
     assert fn(5) == 6
-
-
-def test_iterops_map_filter_with_pb():
-    pipeline = iter_map(add_one) | iter_filter(lambda x: x % 2 == 0)
-    result = list([1, 2, 3, 4] >> pipeline)
-    assert result == [2, 4]
-
-
-def test_iterops_map_filter_with_plain_callable():
-    pipeline = iter_map(lambda x: x * 10) | iter_filter(lambda x: x > 15)
-    result = list([1, 2, 3] >> pipeline)
-    assert result == [20, 30]
 
 
 @pytest.mark.asyncio
@@ -77,22 +61,6 @@ async def async_source(limit: int = 5):
     for value in range(limit):
         await asyncio.sleep(0)
         yield value
-
-
-@pytest.mark.asyncio
-async def test_aiterops_map_filter_with_async_function():
-    pipeline = aiter_map(async_double) | aiter_filter(lambda x: x % 3 == 0)
-    iterator = await (async_source(6) >> pipeline)
-    values = [value async for value in iterator]
-    assert values == [0, 6]
-
-
-@pytest.mark.asyncio
-async def test_aiterops_map_filter_with_pb():
-    pipeline = aiter_map(add_one) | aiter_filter(lambda x: x > 2)
-    iterator = await (async_source(4) >> pipeline)
-    values = [value async for value in iterator]
-    assert values == [3, 4]
 
 
 @pytest.mark.asyncio

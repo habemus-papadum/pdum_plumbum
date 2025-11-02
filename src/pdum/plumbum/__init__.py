@@ -1,6 +1,5 @@
 """A plumbing syntax for Python"""
 
-from . import aiterops, iterops
 from .aiter_pipeline import (
     AsyncIterPb,
     AsyncIterPbFunc,
