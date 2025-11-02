@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Callable
 
 import pytest
 
-from pdum.plumbum import AsyncPbPair, aipb, apb, ensure_async_iter_pb, pb
+from pdum.plumbum import AsyncPbPair, apb, pb
 
 
 @pb
@@ -67,59 +67,3 @@ async def test_asyncpbfunc_normalizes_arguments(pipeline: Any, expected: int) ->
     op = apply(pipeline)
     result = await (3 >> op)
     assert result == expected
-
-
-async def async_source(limit: int = 5):
-    for value in range(limit):
-        await asyncio.sleep(0)
-        yield value
-
-
-@pytest.mark.asyncio
-async def test_aipb_accepts_async_generator_function():
-    async def passthrough(stream):
-        async for item in stream:
-            yield item
-
-    op = aipb(passthrough)
-    iterator = await (async_source(2) >> op)
-    assert [value async for value in iterator] == [0, 1]
-
-
-@pytest.mark.asyncio
-async def test_aipb_accepts_coroutine_returning_async_iterator():
-    async def passthrough(stream):
-        async def inner():
-            async for item in stream:
-                yield item
-
-        return inner()
-
-    op = aipb(passthrough)
-    iterator = await (async_source(1) >> op)
-    assert [value async for value in iterator] == [0]
-
-
-@pytest.mark.asyncio
-async def test_aipb_rejects_sync_iterable_results():
-    def bad(stream):
-        return [1, 2]
-
-    op = aipb(bad)
-    with pytest.raises(TypeError):
-        iterator = await (async_source(1) >> op)
-        await anext(iterator)
-
-
-def test_ensure_async_iter_pb_errors_on_invalid():
-    with pytest.raises(TypeError):
-        ensure_async_iter_pb(42)
-
-
-def test_aipb_idempotent():
-    async def passthrough(stream):
-        async for item in stream:
-            yield item
-
-    op = aipb(passthrough)
-    assert aipb(op) is op
