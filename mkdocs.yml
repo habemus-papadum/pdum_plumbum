@@ -27,4 +27,4 @@ plugins:
         python:
           options:
             docstring_style: numpy
-            show_submodules: true
+            show_submodules: false
