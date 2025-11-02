@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any, Awaitable, Callable
 
 import pytest
 
@@ -48,6 +49,24 @@ async def test_async_pair_repr():
     assert "async" in repr(pair)
     result = await (5 >> pair)
     assert result == 20
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "pipeline, expected",
+    [
+        (async_double | async_double, 12),
+        (add_one | square, 16),
+    ],
+)
+async def test_asyncpbfunc_normalizes_arguments(pipeline: Any, expected: int) -> None:
+    @apb
+    async def apply(value: int, func: Callable[[int], Awaitable[int]]) -> int:
+        return await func(value)
+
+    op = apply(pipeline)
+    result = await (3 >> op)
+    assert result == expected
 
 
 async def async_source(limit: int = 5):

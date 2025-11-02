@@ -28,8 +28,8 @@ class AsyncPb(ABC):
 class AsyncPbFunc(AsyncPb):
     def __init__(self, function: Callable[..., Any], *args: Any, **kwargs: Any) -> None:
         self.function = function
-        self.args = args
-        self.kwargs = kwargs
+        self.args = tuple(self._normalize(value) for value in args)
+        self.kwargs = {key: self._normalize(value) for key, value in kwargs.items()}
         functools.update_wrapper(self, function)
 
     def __call__(self, *args: Any, **kwargs: Any) -> AsyncPbFunc:
@@ -49,6 +49,14 @@ class AsyncPbFunc(AsyncPb):
 
     def __repr__(self) -> str:
         return f"<async {self.function.__name__}>(*{self.args}, **{self.kwargs})"
+
+    @staticmethod
+    def _normalize(value: Any) -> Any:
+        if isinstance(value, AsyncPb):
+            return value.to_async_function()
+        if isinstance(value, Pb):
+            return ensure_async_pb(value).to_async_function()
+        return value
 
 
 class AsyncPbPair(AsyncPb):
