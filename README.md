@@ -340,9 +340,8 @@ The library imposes zero constraints on your data types. It simply provides a cl
 - ✅ Core pipe operations (`|` and `>>`)
 - ✅ Partial application
 - ✅ Automatic function wrapping
-- 🔜 Async/await support
+- ✅ Async/await support
 - 🔜 Additional utility operators
-- 🔜 Performance optimizations
 
 ## API Reference
 
