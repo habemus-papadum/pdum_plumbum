@@ -2,6 +2,7 @@
 
 from . import aiterops as _aiterops_module
 from . import iterops as _iterops_module
+from . import jq as _jq_module
 from .aiterops import (
     AsyncMapper,
     AsyncPredicate,
@@ -76,6 +77,7 @@ __version__ = "0.5.0-alpha"
 # Re-export module objects for convenience
 iterops = _iterops_module
 aiterops = _aiterops_module
+jq = _jq_module
 
 # Re-export sync iterable operators with convenient aliases
 enumerate = iter_enumerate
@@ -151,4 +153,5 @@ __all__ = [
     "AsyncMapper",
     "AsyncPredicate",
     "async_iter_operator",
+    "jq",
 ]

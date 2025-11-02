@@ -326,6 +326,37 @@ Point(1, 2) >> translate(5, 3)  # Point(6, 5)
 
 The data simply flows through your functions—plumbum is purely a **syntax wrapper** around normal function calls.
 
+## jq-like Operators
+
+The `pdum.plumbum.jq` module layers a minimal jq-style path syntax on top of plumbum's pipelines. Use it to navigate and transform JSON-like data structures without leaving Python:
+
+```python
+from pdum.plumbum import pb
+from pdum.plumbum.jq import field, transform, group_by
+from pdum.plumbum.iterops import select, where
+
+records = [
+    {"user": {"id": 1, "name": "Ada"}, "scores": [10, 15]},
+    {"user": {"id": 2, "name": "Linus"}, "scores": [20]},
+]
+
+# Extract nested fields via dotted expressions
+names = records >> select(field("user.name")) >> pb(list)
+# ['Ada', 'Linus']
+
+# Transform values in-place while keeping the original structure immutable
+curved = records >> transform("scores[]", lambda score: score * 1.1)
+
+# Combine with iterops helpers for more complex pipelines
+high_scorers = (
+    records
+    >> where(lambda row: max(row["scores"]) >= 15)
+    >> group_by("user.id")
+)
+```
+
+Async counterparts (prefixed with `a`, e.g. `aexplode`, `agroup_by`) are available for working with `async` iterators.
+
 ## Advanced Examples
 
 ### Data Processing Pipeline

@@ -8,6 +8,11 @@ theme:
   name: "material"
   palette:
     primary: blue grey
+  features:
+    - navigation.sections  # Show sections as groups
+    - navigation.expand  # Expand sections in left nav
+    - toc.follow  # TOC follows scroll
+    # Note: Removed toc.integrate to keep TOC separate on the right
 
 
 nav:
@@ -15,10 +20,26 @@ nav:
   - Tutorial: tutorial.ipynb
   - Topics:
       - Iterable Operators: issues_operator_topics.ipynb
-  - API: reference.md
+      - jq Clone: topics/jq_cheatsheet.ipynb
+  - API:
+      - Core Pipelines: api/core.md
+      - Async Pipelines: api/async_pipeline.md
+      - Iterable Helpers: api/iterops.md
+      - Async Iterable Helpers: api/aiterops.md
+      - jq Operators: api/jq.md
+      - Async jq Operators: api/async_operators.md
 
 # If you'd like to specify a separate docs directory, you can do so here
 docs_dir: docs
+
+# Markdown extensions
+markdown_extensions:
+  - toc:
+      permalink: true
+      toc_depth: 4  # Show more depth now that pages are focused
+      title: On this page
+  - pymdownx.superfences  # Better code blocks
+  - pymdownx.details  # Collapsible sections
 
 # Plugins to enable
 plugins:
@@ -31,8 +52,18 @@ plugins:
         python:
           options:
             docstring_style: numpy
-            show_submodules: false
+            show_submodules: true  # Show all submodules
             members: true
-            inherited_members: true
+            inherited_members: true  # Show all inherited members for completeness
             filters:
               - "!^_"
+            heading_level: 2  # Start at h2 since each page is now focused
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_object_full_path: false  # Shorter names in TOC
+            show_source: false  # Don't show source code to reduce page length
+            group_by_category: true  # Group members by category
+            show_category_heading: true  # Show category headings
+            separate_signature: true  # Separate signature from description
+            line_length: 80  # Wrap long lines
+            show_if_no_docstring: true  # Show all symbols even without docs
