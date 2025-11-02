@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Callable
 
 
 class Pb(ABC):
@@ -26,6 +26,12 @@ class Pb(ABC):
 
     @abstractmethod
     def __rrshift__(self, data: Any) -> Any: ...
+
+    def to_function(self) -> Callable[[Any], Any]:
+        def _call(value: Any) -> Any:
+            return value >> self
+
+        return _call
 
 
 class PbPair(Pb):

@@ -1,5 +1,6 @@
 """A plumbing syntax for Python"""
 
+from . import aiterops, iterops
 from .aiter_pipeline import (
     AsyncIterPb,
     AsyncIterPbFunc,
@@ -7,7 +8,6 @@ from .aiter_pipeline import (
     aipb,
     ensure_async_iter_pb,
     to_async_iter,
-    wrap_async_scalar_as_iter,
 )
 from .async_pipeline import (
     AsyncPb,
@@ -19,7 +19,7 @@ from .async_pipeline import (
 )
 from .core import Pb, PbFunc, PbPair, pb
 
-__version__ = "0.3.0-alpha"
+__version__ = "0.1.0-alpha"
 
 __all__ = [
     "__version__",
@@ -38,6 +38,7 @@ __all__ = [
     "AsyncIterPbPair",
     "aipb",
     "ensure_async_iter_pb",
-    "wrap_async_scalar_as_iter",
     "to_async_iter",
+    "iterops",
+    "aiterops",
 ]

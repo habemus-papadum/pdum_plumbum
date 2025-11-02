@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable
 
 from .core import Pb
 
@@ -17,6 +17,12 @@ class AsyncPb(ABC):
 
     @abstractmethod
     async def __rrshift__(self, data: Any) -> Any: ...
+
+    def to_async_function(self) -> Callable[[Any], Awaitable[Any]]:
+        async def _call(value: Any) -> Any:
+            return await (value >> self)
+
+        return _call
 
 
 class AsyncPbFunc(AsyncPb):
