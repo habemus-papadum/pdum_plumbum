@@ -4,13 +4,13 @@
 
 | Name                                    |    Stmts |     Miss |   Cover |   Missing |
 |---------------------------------------- | -------: | -------: | ------: | --------: |
-| src/pdum/plumbum/\_\_init\_\_.py        |       10 |        0 |    100% |           |
-| src/pdum/plumbum/aiterops.py            |       21 |        0 |    100% |           |
-| src/pdum/plumbum/aiterops\_internals.py |       71 |       14 |     80% |18, 27-30, 35, 37, 50, 52, 58-60, 67, 85 |
-| src/pdum/plumbum/async\_pipeline.py     |       76 |       12 |     84% |16, 82, 86, 94-96, 100-104, 109, 112 |
-| src/pdum/plumbum/core.py                |       41 |        3 |     93% |37, 58, 81 |
-| src/pdum/plumbum/iterops.py             |       16 |        0 |    100% |           |
-|                               **TOTAL** |  **235** |   **29** | **88%** |           |
+| src/pdum/plumbum/\_\_init\_\_.py        |       16 |        0 |    100% |           |
+| src/pdum/plumbum/aiterops.py            |      209 |        2 |     99% |   331-332 |
+| src/pdum/plumbum/aiterops\_internals.py |       71 |        0 |    100% |           |
+| src/pdum/plumbum/async\_pipeline.py     |       76 |        2 |     97% |   86, 112 |
+| src/pdum/plumbum/core.py                |       41 |        0 |    100% |           |
+| src/pdum/plumbum/iterops.py             |      128 |        0 |    100% |           |
+|                               **TOTAL** |  **541** |    **4** | **99%** |           |
 
 
 ## Setup coverage badge
