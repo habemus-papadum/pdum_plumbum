@@ -239,6 +239,39 @@ list([1, 2, 3, 4] >> combine)
 # [4, 6, 8, 10]
 ```
 
+### Async Iterable Helpers (`aiter`, `aselect`, and `awhere`)
+
+The async counterparts mirror the synchronous helpers and work with both sync and async callables:
+
+```python
+import asyncio
+
+from pdum.plumbum import apb, pb
+from pdum.plumbum.aiterops import aiter, aselect, awhere
+
+@pb
+def inc(value: int) -> int:
+    return value + 1
+
+@apb
+async def async_double(value: int) -> int:
+    await asyncio.sleep(0)
+    return value * 2
+
+async def main() -> list[int]:
+    pipeline = (
+        aiter
+        | aselect(inc)  # sync mapper
+        | awhere(lambda value: value % 2 == 0)  # sync predicate
+        | aselect(async_double)  # async mapper
+    )
+    iterator = await ([1, 2, 3, 4] >> pipeline)
+    return [item async for item in iterator]
+
+asyncio.run(main())
+# [4, 6]
+```
+
 ### Plain Functions as Operators
 
 Functions are automatically wrapped when used in pipelines:
