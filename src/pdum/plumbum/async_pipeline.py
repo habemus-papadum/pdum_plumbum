@@ -15,14 +15,11 @@ class AsyncPb(ABC):
     def __ror__(self, other: Any) -> AsyncPb:
         return AsyncPbPair(other, self)
 
+    def __call__(self, value: Any) -> Awaitable[Any]:
+        return value >> self
+
     @abstractmethod
     async def __rrshift__(self, data: Any) -> Any: ...
-
-    def to_async_function(self) -> Callable[[Any], Awaitable[Any]]:
-        async def _call(value: Any) -> Any:
-            return await (value >> self)
-
-        return _call
 
 
 class AsyncPbFunc(AsyncPb):
@@ -32,7 +29,7 @@ class AsyncPbFunc(AsyncPb):
         self.kwargs = kwargs
         functools.update_wrapper(self, function)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> AsyncPbFunc:
+    def partial(self, *args: Any, **kwargs: Any) -> AsyncPbFunc:
         return AsyncPbFunc(
             self.function,
             *self.args,

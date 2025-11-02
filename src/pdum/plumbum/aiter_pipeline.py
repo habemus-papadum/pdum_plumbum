@@ -4,7 +4,7 @@ import functools
 import inspect
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterable, AsyncIterator
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable
 
 
 class AsyncIterPb(ABC):
@@ -13,6 +13,9 @@ class AsyncIterPb(ABC):
 
     def __ror__(self, other: Any) -> AsyncIterPb:
         return AsyncIterPbPair(other, self)
+
+    def __call__(self, value: Any) -> Awaitable[AsyncIterator[Any]]:
+        return value >> self
 
     @abstractmethod
     async def __rrshift__(self, data: Any) -> AsyncIterator[Any]: ...
@@ -25,7 +28,7 @@ class AsyncIterPbFunc(AsyncIterPb):
         self.kwargs = kwargs
         functools.update_wrapper(self, function)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> AsyncIterPbFunc:
+    def partial(self, *args: Any, **kwargs: Any) -> AsyncIterPbFunc:
         return AsyncIterPbFunc(
             self.function,
             *self.args,

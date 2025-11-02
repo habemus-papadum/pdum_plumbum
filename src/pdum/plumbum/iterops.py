@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, cast
 
 from .core import Pb, pb
 
@@ -11,7 +11,7 @@ U = TypeVar("U")
 
 def _normalize(func: Callable[[Any], Any] | Pb) -> Callable[[Any], Any]:
     if isinstance(func, Pb):
-        return func.to_function()
+        return cast(Callable[[Any], Any], func)
     return func
 
 

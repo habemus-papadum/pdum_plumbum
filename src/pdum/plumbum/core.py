@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any
 
 
 class Pb(ABC):
@@ -24,14 +24,11 @@ class Pb(ABC):
     def __ror__(self, other: "Pb | Any") -> "Pb":
         return PbPair(other, self)
 
+    def __call__(self, value: Any) -> Any:
+        return value >> self
+
     @abstractmethod
     def __rrshift__(self, data: Any) -> Any: ...
-
-    def to_function(self) -> Callable[[Any], Any]:
-        def _call(value: Any) -> Any:
-            return value >> self
-
-        return _call
 
 
 class PbPair(Pb):
@@ -53,7 +50,7 @@ class PbFunc(Pb):
         self.function = function
         functools.update_wrapper(self, function)
 
-    def __call__(self, *args, **kwargs):
+    def partial(self, *args, **kwargs):
         return PbFunc(
             self.function,
             *self.args,

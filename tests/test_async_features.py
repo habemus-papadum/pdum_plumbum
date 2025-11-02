@@ -27,9 +27,17 @@ async def async_double(value: int) -> int:
     return value * 2
 
 
-def test_pb_to_function():
-    fn = add_one.to_function()
-    assert fn(5) == 6
+def test_pb_call_threads_value():
+    assert add_one(5) == 6
+
+
+def test_pb_partial_helper():
+    @pb
+    def add_two_numbers(x, amount):
+        return x + amount
+
+    op = add_two_numbers.partial(4)
+    assert 6 >> op == 10
 
 
 def test_iterops_map_filter_with_pb():

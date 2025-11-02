@@ -34,7 +34,7 @@ Unlike the original Pipe library, plumbum makes it easy to define operators and 
 
 ```python
 # In plumbum - operators can be defined and composed without data
-op = multiply(2) | add(3)  # Just defining the pipeline
+op = multiply.partial(2) | add.partial(3)  # Just defining the pipeline
 result = 5 >> op  # Now execute: (5 * 2) + 3 = 13
 
 # This is not possible in Pipe - execution starts immediately when applying "|'
@@ -79,20 +79,20 @@ def power(x, n):
     return x ** n
 
 # Thread data through a single operator
-result = 5 >> add(3)
+result = 5 >> add.partial(3)
 # 8
 
 # Combine operators into pipelines with |
-result = 5 >> (add(3) | multiply(2))
+result = 5 >> (add.partial(3) | multiply.partial(2))
 # (5 + 3) * 2 = 16
 
 # Define reusable operator pipelines
-transform = multiply(2) | add(10) | power(2)
+transform = multiply.partial(2) | add.partial(10) | power.partial(2)
 result = 3 >> transform
 # ((3 * 2) + 10) ** 2 = 256
 
 # Operators are just values - assign and reuse them
-double_and_square = multiply(2) | power(2)
+double_and_square = multiply.partial(2) | power.partial(2)
 5 >> double_and_square  # (5 * 2) ** 2 = 100
 10 >> double_and_square  # (10 * 2) ** 2 = 400
 ```
@@ -115,8 +115,8 @@ def format_number(value, prefix="Result:", decimals=2):
     return f"{prefix} {value:.{decimals}f}"
 
 # Threading data
-5 >> add(10)  # x=5, n=10 -> 15
-3.14159 >> format_number(decimals=3)  # value=3.14159 -> "Result: 3.142"
+5 >> add.partial(10)  # x=5, n=10 -> 15
+3.14159 >> format_number.partial(decimals=3)  # value=3.14159 -> "Result: 3.142"
 ```
 
 #### As a One-Off Wrapper
@@ -135,7 +135,7 @@ You can use `pb()` directly to wrap functions inline without decorating them:
 def add(x, n):
     return x + n
 
-10 >> add(5) >> pb(print)  # Prints: 15
+10 >> add.partial(5) >> pb(print)  # Prints: 15
 
 # Chain multiple one-off wraps
 data = [1, 2, 3, 4, 5]
@@ -144,9 +144,9 @@ data >> pb(lambda x: [i * 2 for i in x]) >> pb(sum) >> pb(print)  # Prints: 30
 # Useful for debugging pipelines
 result = (
     10
-    >> add(5)
+    >> add.partial(5)
     >> pb(print)  # Debug: prints 15
-    >> multiply(2)
+    >> multiply.partial(2)
     >> pb(print)  # Debug: prints 30
 )
 ```
@@ -161,15 +161,15 @@ def greet(name, greeting="Hello", punctuation="!"):
     return f"{greeting}, {name}{punctuation}"
 
 # Use with keyword arguments
-"Alice" >> greet(greeting="Hi")  # "Hi, Alice!"
-"Bob" >> greet(punctuation=".")  # "Hello, Bob."
-"Charlie" >> greet(greeting="Hey", punctuation="!!!")  # "Hey, Charlie!!!"
+"Alice" >> greet.partial(greeting="Hi")  # "Hi, Alice!"
+"Bob" >> greet.partial(punctuation=".")  # "Hello, Bob."
+"Charlie" >> greet.partial(greeting="Hey", punctuation="!!!")  # "Hey, Charlie!!!"
 
 # Mix positional and keyword arguments
-"Diana" >> greet("Greetings", punctuation="...")  # "Greetings, Diana..."
+"Diana" >> greet.partial("Greetings", punctuation="...")  # "Greetings, Diana..."
 
 # Build incrementally with keywords
-formal_greet = greet(greeting="Good day", punctuation=".")
+formal_greet = greet.partial(greeting="Good day", punctuation=".")
 "Elizabeth" >> formal_greet  # "Good day, Elizabeth."
 ```
 
@@ -180,7 +180,7 @@ formal_greet = greet(greeting="Good day", punctuation=".")
 
 ```python
 # | creates pipelines (no execution yet)
-pipeline = add(1) | multiply(2) | add(3)
+pipeline = add.partial(1) | multiply.partial(2) | add.partial(3)
 
 # >> executes the pipeline with data
 result = 5 >> pipeline  # ((5 + 1) * 2) + 3 = 15
@@ -196,9 +196,9 @@ def add_three(x, a, b, c):
     return x + a + b + c
 
 # Build up arguments incrementally
-op = add_three(1)      # x will be threaded, a=1
-op = op(2)             # Add b=2
-op = op(3)             # Add c=3
+op = add_three.partial(1)      # x will be threaded, a=1
+op = op.partial(2)     # Add b=2
+op = op.partial(3)     # Add c=3
 result = 10 >> op      # 10 + 1 + 2 + 3 = 16
 ```
 
@@ -214,13 +214,13 @@ def plain_add(x, n):
     return x + n
 
 # Automatically wrapped in PbFunc when used with |
-pipeline = multiply(2) | plain_increment  # plain_increment gets wrapped
+pipeline = multiply.partial(2) | plain_increment  # plain_increment gets wrapped
 5 >> pipeline  # (5 * 2) + 3 = 13
 
 # Combine with functools.partial to supply extra arguments
 from functools import partial
 
-pipeline_with_extra = multiply(2) | partial(plain_add, n=3)
+pipeline_with_extra = multiply.partial(2) | partial(plain_add, n=3)
 5 >> pipeline_with_extra  # (5 * 2) + 3 = 13
 ```
 
@@ -230,7 +230,7 @@ pipeline_with_extra = multiply(2) | partial(plain_add, n=3)
 
 ```python
 # Works with numbers
-5 >> add(3) >> multiply(2)
+5 >> add.partial(3) >> multiply.partial(2)
 
 # Works with strings
 "hello" >> pb(str.upper) >> pb(lambda s: s + "!")
@@ -247,7 +247,7 @@ class Point:
 def translate(point, dx, dy):
     return Point(point.x + dx, point.y + dy)
 
-Point(1, 2) >> translate(5, 3)  # Point(6, 5)
+Point(1, 2) >> translate.partial(5, 3)  # Point(6, 5)
 
 # Works with lists (but no special iterator handling)
 [1, 2, 3] >> pb(lambda lst: [x * 2 for x in lst])  # [2, 4, 6]
@@ -301,7 +301,7 @@ def replace(s, old, new):
     return s.replace(old, new)
 
 # Build text transformation pipeline
-clean_text = strip() | replace(" ", "_") | uppercase()
+clean_text = strip | replace.partial(" ", "_") | uppercase
 
 "  hello world  " >> clean_text  # "HELLO_WORLD"
 ```

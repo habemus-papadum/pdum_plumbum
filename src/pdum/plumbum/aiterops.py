@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import AsyncIterator
-from typing import Any, Awaitable, Callable, TypeVar
+from typing import Any, Awaitable, Callable, TypeVar, cast
 
 from .aiter_pipeline import AsyncIterPb, aipb
 from .async_pipeline import AsyncPb
@@ -19,14 +19,12 @@ async def _maybe_await(value: Any) -> Any:
 
 
 def _normalize(func: Callable[[Any], Any] | Pb | AsyncPb) -> Callable[[Any], Awaitable[Any] | Any]:
-    if isinstance(func, AsyncPb):
-        return func.to_async_function()
-    if isinstance(func, Pb):
-        return func.to_function()
+    if isinstance(func, (AsyncPb, Pb)):
+        return cast(Callable[[Any], Awaitable[Any] | Any], func)
     return func
 
 
-def map(func: Callable[[T], U] | Pb) -> AsyncIterPb:
+def map(func: Callable[[T], U] | Pb | AsyncPb) -> AsyncIterPb:
     callable_func = _normalize(func)
 
     async def _do(stream: AsyncIterator[T]) -> AsyncIterator[U]:
@@ -38,7 +36,7 @@ def map(func: Callable[[T], U] | Pb) -> AsyncIterPb:
     return aipb(_do)
 
 
-def filter(func: Callable[[T], bool] | Pb) -> AsyncIterPb:
+def filter(func: Callable[[T], bool] | Pb | AsyncPb) -> AsyncIterPb:
     callable_func = _normalize(func)
 
     async def _do(stream: AsyncIterator[T]) -> AsyncIterator[T]:
