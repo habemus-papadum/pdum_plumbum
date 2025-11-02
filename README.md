@@ -5,6 +5,7 @@
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Coverage](https://raw.githubusercontent.com/habemus-papadum/pdum_plumbum/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/habemus-papadum/pdum_plumbum/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 A plumbing syntax for Python that provides a clear distinction between data and operators, enabling composable function pipelines with explicit control flow.
 
@@ -411,7 +412,7 @@ The library imposes zero constraints on your data types. It simply provides a cl
 - ✅ Partial application
 - ✅ Automatic function wrapping
 - ✅ Async/await support
-- 🔜 Additional utility operators
+- ✅ Additional utility operators
 
 ## API Reference
 

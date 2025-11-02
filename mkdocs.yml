@@ -13,6 +13,8 @@ theme:
 nav:
   - Home: index.md
   - Tutorial: tutorial.ipynb
+  - Topics:
+      - Iterable Operators: issues_operator_topics.ipynb
   - API: reference.md
 
 # If you'd like to specify a separate docs directory, you can do so here
