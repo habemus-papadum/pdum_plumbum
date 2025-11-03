@@ -127,3 +127,29 @@ async def test_ensure_async_pb_accepts_plain_callable() -> None:
 
     op = ensure_async_pb(plain)
     assert await (4 >> op) == 16
+
+
+@pytest.mark.asyncio
+async def test_async_greater_operator_threads_like_rshift() -> None:
+    assert await (5 > async_double) == 10
+
+
+@pytest.mark.filterwarnings("ignore:coroutine '.*' was never awaited")
+def test_async_chained_greater_with_operator_raises_helpful_error() -> None:
+    with pytest.raises(TypeError) as excinfo:
+        5 > async_double > async_double
+    message = str(excinfo.value)
+    assert "parentheses" in message
+    assert "another plumbum operator" in message
+
+
+@pytest.mark.filterwarnings("ignore:coroutine '.*' was never awaited")
+def test_async_chained_greater_with_callable_raises_helpful_error() -> None:
+    async def sink(value: int) -> int:
+        return value
+
+    with pytest.raises(TypeError) as excinfo:
+        5 > async_double > sink
+    message = str(excinfo.value)
+    assert "parentheses" in message
+    assert "object of type function" in message

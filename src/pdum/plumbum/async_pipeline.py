@@ -9,6 +9,24 @@ from .core import Pb
 
 
 class AsyncPb(ABC):
+    """
+    Base class for asynchronous plumbum operators.
+    """
+
+    operator_kind = "async"
+
+    def __lt__(self, other: Any) -> Any:
+        setattr(self, "_last_right_comparison", other)
+        return self.__rgt__(other)
+
+    def __gt__(self, other: Any) -> Any:
+        message = self._format_gt_chain_error(other)
+        setattr(self, "_last_right_comparison", None)
+        raise TypeError(message)
+
+    def __rgt__(self, data: Any) -> Any:
+        return self.__rrshift__(data)
+
     def __or__(self, other: Any) -> AsyncPb:
         return AsyncPbPair(self, other)
 
@@ -23,6 +41,22 @@ class AsyncPb(ABC):
             return await (value >> self)
 
         return _call
+
+    def _format_gt_chain_error(self, other: Any) -> str:
+        other_kind = getattr(other, "operator_kind", None)
+        if other_kind in {"sync", "async"}:
+            rhs_description = "another plumbum operator"
+        else:
+            rhs_description = f"an object of type {type(other).__name__}"
+
+        return (
+            "Chained '>' comparisons involving plumbum operators are not supported. "
+            "Python interprets 'a > b > c' as a chained comparison, so the expression "
+            f"you wrote ended up comparing the operator against {rhs_description}. "
+            "Wrap the first comparison in parentheses—e.g. '(value > operator) > next'—"
+            "or continue using the standard '>>' threading syntax. "
+            "When using async operators remember to await the result: 'await (value > operator)'."
+        )
 
 
 class AsyncPbFunc(AsyncPb):

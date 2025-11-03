@@ -71,3 +71,26 @@ def test_pbpair_repr_includes_components() -> None:
 def test_pbfunc_repr_includes_function_name() -> None:
     representation = repr(add_one)
     assert "add_one" in representation
+
+
+def test_greater_operator_threads_like_rshift() -> None:
+    assert (5 > add_one) == 6
+
+
+def test_chained_greater_with_operator_raises_helpful_error() -> None:
+    with pytest.raises(TypeError) as excinfo:
+        5 > add_one > multiply(2)
+    message = str(excinfo.value)
+    assert "parentheses" in message
+    assert "another plumbum operator" in message
+
+
+def test_chained_greater_with_callable_raises_helpful_error() -> None:
+    def collector(value: int) -> int:
+        return value
+
+    with pytest.raises(TypeError) as excinfo:
+        5 > add_one > collector
+    message = str(excinfo.value)
+    assert "parentheses" in message
+    assert "object of type function" in message
