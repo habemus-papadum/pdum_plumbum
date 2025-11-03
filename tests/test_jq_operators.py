@@ -170,3 +170,21 @@ def test_zip_fields_and_merge_helpers() -> None:
     merged = profile > merge("base", "extra")
     assert merged["a"] == 1
     assert merged["b"] == 2
+
+
+def test_transform_returns_new_structure_without_mutating_input() -> None:
+    records = [
+        {"user": {"id": 1, "name": "Ada"}, "scores": [10, 15]},
+        {"user": {"id": 2, "name": "Linus"}, "scores": [20]},
+    ]
+    curved = records > select(transform("scores[]", lambda score: score * 1.1)) | list
+
+    assert curved == [
+        {"user": {"id": 1, "name": "Ada"}, "scores": [11.0, 16.5]},
+        {"user": {"id": 2, "name": "Linus"}, "scores": [22.0]},
+    ]
+    # Original input remains unchanged because transform applies updates immutably.
+    assert records == [
+        {"user": {"id": 1, "name": "Ada"}, "scores": [10, 15]},
+        {"user": {"id": 2, "name": "Linus"}, "scores": [20]},
+    ]
