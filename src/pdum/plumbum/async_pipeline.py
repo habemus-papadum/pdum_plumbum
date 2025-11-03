@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Awaitable, Callable
 
@@ -25,7 +26,7 @@ class AsyncPb(ABC):
         raise TypeError(message)
 
     def __rgt__(self, data: Any) -> Any:
-        return self.__rrshift__(data)
+        return self._thread(data)
 
     def __or__(self, other: Any) -> AsyncPb:
         return AsyncPbPair(self, other)
@@ -33,12 +34,21 @@ class AsyncPb(ABC):
     def __ror__(self, other: Any) -> AsyncPb:
         return AsyncPbPair(other, self)
 
+    async def __rrshift__(self, data: Any) -> Any:
+        warnings.warn(
+            "The '>>' threading operator is deprecated and will be removed in a future release. "
+            "Use the low-precedence '>' operator instead, e.g. 'await (value > pipeline)'.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return await self._thread(data)
+
     @abstractmethod
-    async def __rrshift__(self, data: Any) -> Any: ...
+    async def _thread(self, data: Any) -> Any: ...
 
     def to_async_function(self) -> Callable[[Any], Awaitable[Any]]:
         async def _call(value: Any) -> Any:
-            return await (value >> self)
+            return await (value > self)
 
         return _call
 
@@ -53,8 +63,7 @@ class AsyncPb(ABC):
             "Chained '>' comparisons involving plumbum operators are not supported. "
             "Python interprets 'a > b > c' as a chained comparison, so the expression "
             f"you wrote ended up comparing the operator against {rhs_description}. "
-            "Wrap the first comparison in parentheses—e.g. '(value > operator) > next'—"
-            "or continue using the standard '>>' threading syntax. "
+            "Wrap the first comparison in parentheses—e.g. '(value > operator) > next'. "
             "When using async operators remember to await the result: 'await (value > operator)'."
         )
 
@@ -75,7 +84,7 @@ class AsyncPbFunc(AsyncPb):
             **kwargs,
         )
 
-    async def __rrshift__(self, data: Any) -> Any:
+    async def _thread(self, data: Any) -> Any:
         result = self.function(data, *self.args, **self.kwargs)
         if inspect.isawaitable(result):
             result = await result
@@ -98,9 +107,9 @@ class AsyncPbPair(AsyncPb):
         self.left = ensure_async_pb(left)
         self.right = ensure_async_pb(right)
 
-    async def __rrshift__(self, data: Any) -> Any:
-        intermediate = await self.left.__rrshift__(data)
-        return await self.right.__rrshift__(intermediate)
+    async def _thread(self, data: Any) -> Any:
+        intermediate = await self.left._thread(data)
+        return await self.right._thread(intermediate)
 
     def __repr__(self) -> str:
         return f"<{self.left!r}> | <{self.right!r}>"
@@ -110,8 +119,8 @@ class _SyncToAsyncAdapter(AsyncPb):
     def __init__(self, operator: Pb) -> None:
         self.operator = operator
 
-    async def __rrshift__(self, data: Any) -> Any:
-        result = self.operator.__rrshift__(data)
+    async def _thread(self, data: Any) -> Any:
+        result = self.operator._thread(data)
         if inspect.isawaitable(result):
             result = await result
         return result

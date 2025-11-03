@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
@@ -42,7 +43,7 @@ class Pb(ABC):
         raise TypeError(message)
 
     def __rgt__(self, data: Any) -> Any:
-        return self.__rrshift__(data)
+        return self._thread(data)
 
     def __or__(self, other: "Pb | Any") -> "Pb":
         return PbPair(self, other)
@@ -50,12 +51,21 @@ class Pb(ABC):
     def __ror__(self, other: "Pb | Any") -> "Pb":
         return PbPair(other, self)
 
+    def __rrshift__(self, data: Any) -> Any:
+        warnings.warn(
+            "The '>>' threading operator is deprecated and will be removed in a future release. "
+            "Use the low-precedence '>' operator instead, e.g. 'value > pipeline'.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._thread(data)
+
     @abstractmethod
-    def __rrshift__(self, data: Any) -> Any: ...
+    def _thread(self, data: Any) -> Any: ...
 
     def to_function(self) -> Callable[[Any], Any]:
         def _call(value: Any) -> Any:
-            return value >> self
+            return value > self
 
         return _call
 
@@ -70,8 +80,7 @@ class Pb(ABC):
             "Chained '>' comparisons involving plumbum operators are not supported. "
             "Python interprets 'a > b > c' as a chained comparison, so the expression "
             f"you wrote ended up comparing the operator against {rhs_description}. "
-            "Wrap the first comparison in parentheses—e.g. '(value > operator) > next'—"
-            "or continue using the standard '>>' threading syntax."
+            "Wrap the first comparison in parentheses—e.g. '(value > operator) > next'."
         )
 
 
@@ -80,8 +89,8 @@ class PbPair(Pb):
         self.left = left if isinstance(left, Pb) else PbFunc(left)
         self.right = right if isinstance(right, Pb) else PbFunc(right)
 
-    def __rrshift__(self, data: Any) -> Any:
-        return self.right.__rrshift__(self.left.__rrshift__(data))
+    def _thread(self, data: Any) -> Any:
+        return self.right._thread(self.left._thread(data))
 
     def __repr__(self) -> str:
         return "<%s> | <%s>" % (repr(self.left), repr(self.right))
@@ -103,7 +112,7 @@ class PbFunc(Pb):
             **kwargs,
         )
 
-    def __rrshift__(self, data: Any) -> Any:
+    def _thread(self, data: Any) -> Any:
         return self.function(data, *self.args, **self.kwargs)
 
     def __repr__(self) -> str:
