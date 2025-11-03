@@ -13,7 +13,7 @@ A plumbing syntax for Python that provides a clear distinction between data and 
 
 **plumbum** is a library for threading data through function calls using intuitive pipe operators. Inspired by [Pipe](https://github.com/JulienPalard/Pipe), it offers a redesigned approach with a separation between operator construction and execution.
 
-**This is primarily a syntax library** focused on making data transformations more readable and composable. It is not optimized for performance-critical applications, but rather for clarity and expressiveness in your code.
+**This is primarily a syntax library** focused on making data transformations more readable and composable. It is not optimized for performance-critical applications, but rather caters to the aeshetics of @habemus-papadum -- so, your mileage may vary...
 
 ## Installation
 ```bash
