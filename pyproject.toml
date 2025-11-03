@@ -1,6 +1,6 @@
 [project]
 name = "habemus-papadum-plumbum"
-version = "0.6.0"
+version = "0.7.0-alpha"
 description = "A plumbing syntax for Python"
 readme = "README.md"
 license = { file = "LICENSE" }
