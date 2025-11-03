@@ -7,13 +7,13 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Coverage](https://raw.githubusercontent.com/habemus-papadum/pdum_plumbum/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/habemus-papadum/pdum_plumbum/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-A plumbing syntax for Python that provides a clear distinction between data and operators, enabling composable function pipelines with explicit control flow.
+A plumbing syntax for Python that provides a clear distinction between data and operators, enabling composable function pipelines.
 
 ## Overview
 
 **plumbum** is a library for threading data through function calls using intuitive pipe operators. Inspired by [Pipe](https://github.com/JulienPalard/Pipe), it offers a redesigned approach with a separation between operator construction and execution.
 
-**This is primarily a syntax library** focused on making data transformations more readable and composable. It is not optimized for performance-critical applications, but rather caters to the aeshetics of @habemus-papadum -- so, your mileage may vary...
+**This is primarily a syntax library** focused on making data transformations more readable and composable. It is not optimized for performance-critical applications, but rather caters to the aesthetics of @habemus-papadum -- so, your mileage may vary...
 
 ## Installation
 ```bash
@@ -28,7 +28,7 @@ pip install habemus-papadum-plumbum
 
 # Iterators
 [1, 2, 3] > select(mul(3) | add(1)) | where(even) | list # [4, 10]
- 
+
 # Async
 await (5 > async_add(1) | async_mul(2))  # 12
 await ([1, 2, 3] > aiter | aselect(async_add(1)) | alist) # [2, 3, 4]
@@ -60,20 +60,20 @@ op2 = add(3) | multiply(12)
 - **Sync to async promotion is automatic.** Pipelines built from `@pb` operators seamlessly adopt async semantics when an `@apb` stage (or any awaitable) appears. Keep composing with `|`; the result becomes awaitable.
 - **Await async chains.** Any pipeline that includes async operators returns a coroutine. Execute it with `await (value > pipeline)` (or equivalently `await pipeline(value)`).
 - **Collect async results with `alist` / `acollect`.** Finish async iterator pipelines with `| alist` (alias `| acollect`) when you need a list in memory.
-- **Avoid chained `>` comparisons.** Python treats `x > a > b` as a chained comparison, which is incompatible with plumbum operators. Prefer `x > (a | b)`; only use `(x > a) > b` when you intentionally need two separate execution steps.
+- **Avoid chained `>` comparisons.** Python treats `x > a > b` as a chained comparison, which is incompatible with plumbum operators. Prefer `x > a | b`; only use `(x > a) > b` when you intentionally need two separate execution steps.
 
 ## Tutorial Notebook
 
-Learn the details of synchronous and asynchronous pipelines work by following along step-by-step in the [Tutorial](https://habemus-papadum.github.io/pdum_plumbum/tutorial/), which hosts the full quick-start tour covering core operators, partial application, iterable helpers, and async variants.
+Learn the details of synchronous and asynchronous pipelines by following along step-by-step in the [Tutorial](https://habemus-papadum.github.io/pdum_plumbum/tutorial/), which hosts the full quick-start tour covering core operators, partial application, iterable helpers, and async variants.
 
 
 ## Acknowledgements
 
 - plumbum draws direct inspiration from Julien Palard’s [Pipe](https://github.com/JulienPalard/Pipe); several iterable operators (for example `select`, `where`, and `dedup`) started life there before being reworked for plumbum’s APIs.
 - Key differences from Pipe:
-  - Operators are inert values: `|` builds pipelines while `>` triggers execution, making composition and reuse explicit.
-  - Async is a core capability: sync and async operators coexist in the same pipeline, and iterator helpers come in both synchronous and asynchronous flavors.
-  - The bundled `pdum.plumbum.jq` module adds a jq-inspired path/query layer, expanding the original operator toolbox into structured-data transformations.
+    - Operators are inert values: `|` builds pipelines while `>` triggers execution, making composition and reuse explicit.
+    - Async is a core capability: sync and async operators coexist in the same pipeline, and iterator helpers come in both synchronous and asynchronous flavors.
+    - The bundled `pdum.plumbum.jq` module adds a jq-inspired path/query layer, expanding the original operator toolbox into structured-data transformations.
 - The codebase was authored primarily with AI assistance—roughly 95% by OpenAI Codex and 5% by Claude Code—with artistic direction and stewardship by @habemus-papadum.
 
 ## Development
@@ -130,7 +130,7 @@ uv run ruff check --fix .
 ### Building
 
 ```bash
-# Build Python 
+# Build Python
 ./scripts/build.sh
 
 # Or build just the Python distribution artifacts
