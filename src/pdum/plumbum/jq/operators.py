@@ -245,7 +245,7 @@ def group_by(iterable: Iterable[JsonValue], expr: str) -> list[tuple[Any, list[J
         return _first_match(item, expr)
 
     groups = []
-    for key, group in iterable >> iter_groupby(key_func):
+    for key, group in iterable > iter_groupby(key_func):
         groups.append((key, list(group)))
     return groups
 
@@ -253,7 +253,7 @@ def group_by(iterable: Iterable[JsonValue], expr: str) -> list[tuple[Any, list[J
 @pb
 def count_by(iterable: Iterable[JsonValue], expr: str) -> dict[Any, int]:
     counts: dict[Any, int] = defaultdict(int)
-    for key, group in iterable >> iter_groupby(lambda item: _first_match(item, expr)):
+    for key, group in iterable > iter_groupby(lambda item: _first_match(item, expr)):
         counts[key] = sum(1 for _ in group)
     return dict(counts)
 
@@ -268,7 +268,7 @@ def sum_by(
 ) -> dict[Any, float]:
     totals: dict[Any, float] = defaultdict(float)
 
-    for key, group in iterable >> iter_groupby(lambda item: _first_match(item, key_expr)):
+    for key, group in iterable > iter_groupby(lambda item: _first_match(item, key_expr)):
         total = 0.0
         for item in group:
             value = _first_match(item, value_expr)
@@ -356,7 +356,7 @@ def merge(value: JsonValue, *exprs: str) -> JsonValue:
 @pb
 def unwind(value: JsonValue, expr: str, *, keep_empty: bool = False) -> Iterator[JsonValue]:
     any_yielded = False
-    for item in value >> explode(expr):
+    for item in value > explode(expr):
         any_yielded = True
         yield item
     if not any_yielded and keep_empty:

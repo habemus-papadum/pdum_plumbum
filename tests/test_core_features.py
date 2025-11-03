@@ -22,7 +22,7 @@ def apply(value: int, func) -> int:
 
 
 def test_pbfunc_normalizes_pb_argument() -> None:
-    assert (3 >> apply(add_one)) == 4
+    assert (3 > apply(add_one)) == 4
 
 
 def test_pipeline_to_function() -> None:
@@ -38,7 +38,7 @@ async def test_asyncpbfunc_normalizes_async_argument() -> None:
         return await func(value)
 
     op = apply_async(add_one)
-    assert await (2 >> op) == 3
+    assert await (2 > op) == 3
 
 
 @pytest.mark.asyncio
@@ -52,13 +52,13 @@ async def test_asyncpbfunc_accepts_asyncpb_argument() -> None:
         return value * 2
 
     op = async_apply(async_double)
-    assert await (3 >> op) == 6
+    assert await (3 > op) == 6
 
 
 def test_pb_ror_creates_pair() -> None:
     pair = add_one.__ror__(multiply(2))
     assert isinstance(pair, PbPair)
-    assert (3 >> pair) == 7
+    assert (3 > pair) == 7
 
 
 def test_pbpair_repr_includes_components() -> None:

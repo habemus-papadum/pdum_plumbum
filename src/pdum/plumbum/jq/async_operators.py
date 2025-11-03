@@ -29,7 +29,7 @@ async def aunwind(iterator: AsyncIterator[JsonValue], expr: str, keep_empty: boo
     async def generator() -> AsyncIterator[Any]:
         async for item in iterator:
             yielded = False
-            for value in item >> jq_ops.explode(expr):
+            for value in item > jq_ops.explode(expr):
                 yielded = True
                 yield value
             if not yielded and keep_empty:
@@ -42,14 +42,14 @@ async def aunwind(iterator: AsyncIterator[JsonValue], expr: str, keep_empty: boo
 async def agroup_by(stream: AsyncIterable[JsonValue] | JsonValue, expr: str) -> list[tuple[Any, list[JsonValue]]]:
     iterator = await to_async_iterator(stream)
     items = [item async for item in iterator]
-    return items >> jq_ops.group_by(expr)
+    return items > jq_ops.group_by(expr)
 
 
 @apb
 async def acount_by(stream: AsyncIterable[JsonValue] | JsonValue, expr: str) -> dict[Any, int]:
     iterator = await to_async_iterator(stream)
     items = [item async for item in iterator]
-    return items >> jq_ops.count_by(expr)
+    return items > jq_ops.count_by(expr)
 
 
 @apb
@@ -62,14 +62,14 @@ async def asum_by(
 ) -> dict[Any, float]:
     iterator = await to_async_iterator(stream)
     items = [item async for item in iterator]
-    return items >> jq_ops.sum_by(key_expr, value_expr, default=default)
+    return items > jq_ops.sum_by(key_expr, value_expr, default=default)
 
 
 @apb
 async def astats(stream: AsyncIterable[JsonValue] | JsonValue, expr: str) -> dict[str, float]:
     iterator = await to_async_iterator(stream)
     items = [item async for item in iterator]
-    return items >> jq_ops.stats(expr)
+    return items > jq_ops.stats(expr)
 
 
 __all__ = ["aexplode", "aunwind", "agroup_by", "acount_by", "asum_by", "astats"]

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import functools
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
@@ -16,7 +15,7 @@ class Pb(ABC):
 
     The primary operators are:
     - `|` (pipe): Combines operators into a pipeline (creates PbPair)
-    - `>>` (thread): Threads data through the pipeline
+    - `>` (thread): Threads data through the pipeline
 
     Coercing an operator or pipeline into a plain callable can be done explicitly
     via :meth:`Pb.to_function`:
@@ -60,12 +59,6 @@ class Pb(ABC):
         return PbPair(other, self)
 
     def __rrshift__(self, data: Any) -> Any:
-        warnings.warn(
-            "The '>>' threading operator is deprecated and will be removed in a future release. "
-            "Use the low-precedence '>' operator instead, e.g. 'value > pipeline'.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return self._thread(data)
 
     @abstractmethod

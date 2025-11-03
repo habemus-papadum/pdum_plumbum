@@ -1,7 +1,7 @@
 # Async/Await Support Design Notes
 
 ## Goals and Constraints
-- Preserve the ergonomic `|` (pipe) and `>>` (thread) syntax.
+- Preserve the ergonomic `|` (compose) and `>` (thread) syntax.
 - Keep data vs. operator separation; operators should remain first-class values that can be composed before execution.
 - Support partial application semantics identical to the synchronous API.
 - Avoid surprising implicit `await` calls that could consume values meant to stay awaitable.
@@ -19,7 +19,7 @@
 - **Ambiguity of awaitables:** Pipelines may intentionally thread awaitable objects (e.g., `asyncio.Task` used as plain data). Automatically awaiting them changes semantics and breaks those scenarios.
 - **Partial application + dynamic dispatch:** After partial application, we may lose access to the original function object (e.g., `functools.partial`, bound methods). Detection would need to occur on every call anyway, effectively reintroducing branching cost each pipeline execution.
 - **Mixing sync and async:** Once a coroutine-producing stage appears, every downstream stage must be aware that it receives an awaited value rather than a coroutine object. Retrofitting this logic into existing synchronous classes complicates reasoning and increases coupling.
-- **Operator consistency:** Today `data >> pipeline` returns a value immediately. Switching to sometimes returning coroutines would silently change usage patterns and risk un-awaited coroutines or blocking calls.
+- **Operator consistency:** Today `data > pipeline` returns a value immediately. Switching to sometimes returning coroutines would silently change usage patterns and risk un-awaited coroutines or blocking calls.
 
 ### Verdict
 This approach is error-prone, obscures execution semantics, and introduces subtle behavioural changes. It also makes testing and typing harder (return type becomes `Any | Awaitable[Any]` everywhere). Not recommended.
@@ -45,8 +45,8 @@ This approach is error-prone, obscures execution semantics, and introduces subtl
 - `|` still composes operators. When combining async with sync:
   - Promote synchronous `Pb` objects to `AsyncPb` via a lightweight adapter that wraps `__rrshift__` in an async function (e.g., `async def __rrshift__(data): return sync_operator.__rrshift__(data)`).
   - Preserve reference semantics so the operator can still be reused in synchronous contexts.
-- `>>` remains the threading operator:
-  - `data >> async_pipeline` yields a coroutine object; users must `await` it (`result = await (data >> pipeline)`).
+- `>` remains the threading operator:
+  - `data > async_pipeline` yields a coroutine object; users must `await` it (`result = await (data > pipeline)`).
   - Chaining remains left-associative, and partial pipelines can still be assigned to variables.
 
 ### Partial Application & Composition
@@ -73,5 +73,5 @@ Build a parallel async pipeline stack and introduce an explicit `apb` decorator 
 ## Next Steps
 1. Prototype `AsyncPb`, `AsyncPbFunc`, and `AsyncPbPair` mirroring the synchronous implementations.
 2. Implement the `apb` decorator, including adaptation logic for synchronous callables used in async pipelines.
-3. Update documentation and tests to cover async usage patterns (`await (value >> pipeline)`).
+3. Update documentation and tests to cover async usage patterns (`await (value > pipeline)`).
 4. Evaluate typing strategy (PEP 484/PEP 544) to expose awaitable return types for async pipelines.

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import inspect
-import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Awaitable, Callable
 
@@ -35,12 +34,6 @@ class AsyncPb(ABC):
         return AsyncPbPair(other, self)
 
     async def __rrshift__(self, data: Any) -> Any:
-        warnings.warn(
-            "The '>>' threading operator is deprecated and will be removed in a future release. "
-            "Use the low-precedence '>' operator instead, e.g. 'await (value > pipeline)'.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         return await self._thread(data)
 
     @abstractmethod

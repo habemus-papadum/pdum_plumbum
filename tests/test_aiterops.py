@@ -60,14 +60,14 @@ async def async_source(values: Iterable[int]) -> AsyncIterator[int]:
 
 @pytest.mark.asyncio
 async def test_aiter_converts_sync_iterable() -> None:
-    result_iterator = await ([1, 2, 3] >> aiter)
+    result_iterator = await ([1, 2, 3] > aiter)
     assert await collect(result_iterator) == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_aselect_with_sync_mapper_on_list() -> None:
     pipeline = aiter | aselect(lambda value: value * 2)
-    result = await collect(await ([1, 2, 3] >> pipeline))
+    result = await collect(await ([1, 2, 3] > pipeline))
     assert result == [2, 4, 6]
 
 
@@ -79,13 +79,13 @@ async def test_aselect_with_async_mapper_on_iterator() -> None:
 
     iterator = iter([1, 2, 3])
     pipeline = aiter | aselect(async_double)
-    assert await collect(await (iterator >> pipeline)) == [2, 4, 6]
+    assert await collect(await (iterator > pipeline)) == [2, 4, 6]
 
 
 @pytest.mark.asyncio
 async def test_awhere_with_sync_predicate_on_async_iterable() -> None:
     pipeline = awhere(lambda value: value % 2 == 0)
-    result_iterator = await (async_source(range(5)) >> pipeline)
+    result_iterator = await (async_source(range(5)) > pipeline)
     assert await collect(result_iterator) == [0, 2, 4]
 
 
@@ -96,7 +96,7 @@ async def test_awhere_with_async_predicate_on_list() -> None:
         return value % 2 == 0
 
     pipeline = aiter | awhere(is_even)
-    result = await collect(await ([1, 2, 3, 4] >> pipeline))
+    result = await collect(await ([1, 2, 3, 4] > pipeline))
     assert result == [2, 4]
 
 
@@ -126,7 +126,7 @@ async def async_is_even(value: int) -> bool:
 async def test_aselect_accepts_pb_pipeline() -> None:
     mapper_pipeline: AsyncMapper[int, int] = add_one | add_one
     pipeline = aiter | aselect(mapper_pipeline)
-    result = await collect(await ([1, 2] >> pipeline))
+    result = await collect(await ([1, 2] > pipeline))
     assert result == [3, 4]
 
 
@@ -134,7 +134,7 @@ async def test_aselect_accepts_pb_pipeline() -> None:
 async def test_aselect_accepts_apb_pipeline() -> None:
     mapper_pipeline: AsyncMapper[int, int] = async_add_one | async_add_one
     pipeline = aiter | aselect(mapper_pipeline)
-    result = await collect(await ([0, 5] >> pipeline))
+    result = await collect(await ([0, 5] > pipeline))
     assert result == [2, 7]
 
 
@@ -142,7 +142,7 @@ async def test_aselect_accepts_apb_pipeline() -> None:
 async def test_awhere_accepts_pb_pipeline() -> None:
     predicate_pipeline: AsyncPredicate[int] = is_positive
     pipeline = aiter | awhere(predicate_pipeline)
-    result = await collect(await ([-2, -1, 0, 1] >> pipeline))
+    result = await collect(await ([-2, -1, 0, 1] > pipeline))
     assert result == [1]
 
 
@@ -150,27 +150,27 @@ async def test_awhere_accepts_pb_pipeline() -> None:
 async def test_awhere_accepts_apb_pipeline() -> None:
     predicate_pipeline: AsyncPredicate[int] = async_is_even
     pipeline = aiter | awhere(predicate_pipeline)
-    result = await collect(await (range(5) >> pipeline))
+    result = await collect(await (range(5) > pipeline))
     assert result == [0, 2, 4]
 
 
 @pytest.mark.asyncio
 async def test_combined_aselect_and_awhere_pipeline() -> None:
     pipeline = aiter | aselect(lambda value: value + 1) | awhere(lambda value: value % 2 == 0) | aselect(async_add_one)
-    result_iterator = await ([1, 2, 3, 4] >> pipeline)
+    result_iterator = await ([1, 2, 3, 4] > pipeline)
     assert await collect(result_iterator) == [3, 5]
 
 
 @pytest.mark.asyncio
 async def test_atake_limits_items() -> None:
     pipeline = aiter | atake(2)
-    result_iterator = await ([1, 2, 3] >> pipeline)
+    result_iterator = await ([1, 2, 3] > pipeline)
     assert await collect(result_iterator) == [1, 2]
 
 
 @pytest.mark.asyncio
 async def test_atail_collects_last_items() -> None:
-    result = await ([1, 2, 3, 4] >> (aiter | atail(2)))
+    result = await ([1, 2, 3, 4] > (aiter | atail(2)))
     assert isinstance(result, deque)
     assert list(result) == [3, 4]
 
@@ -178,67 +178,67 @@ async def test_atail_collects_last_items() -> None:
 @pytest.mark.asyncio
 async def test_askip_skips_requested_items() -> None:
     pipeline = aiter | askip(2)
-    result_iterator = await ([1, 2, 3, 4] >> pipeline)
+    result_iterator = await ([1, 2, 3, 4] > pipeline)
     assert await collect(result_iterator) == [3, 4]
 
 
 @pytest.mark.asyncio
 async def test_atake_while_stops_predicate() -> None:
     pipeline = aiter | atake_while(lambda value: value < 3)
-    result_iterator = await ([1, 2, 3, 4] >> pipeline)
+    result_iterator = await ([1, 2, 3, 4] > pipeline)
     assert await collect(result_iterator) == [1, 2]
 
 
 @pytest.mark.asyncio
 async def test_askip_while_drops_prefix() -> None:
     pipeline = aiter | askip_while(lambda value: value < 3)
-    result_iterator = await ([1, 2, 3, 4] >> pipeline)
+    result_iterator = await ([1, 2, 3, 4] > pipeline)
     assert await collect(result_iterator) == [3, 4]
 
 
 @pytest.mark.asyncio
 async def test_adedup_removes_duplicates() -> None:
     pipeline = aiter | adedup()
-    result_iterator = await ([1, 1, 2, 2, 3] >> pipeline)
+    result_iterator = await ([1, 1, 2, 2, 3] > pipeline)
     assert await collect(result_iterator) == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_auniq_removes_consecutive_duplicates() -> None:
     pipeline = aiter | auniq()
-    result_iterator = await ([1, 1, 2, 1, 1, 3] >> pipeline)
+    result_iterator = await ([1, 1, 2, 1, 1, 3] > pipeline)
     assert await collect(result_iterator) == [1, 2, 1, 3]
 
 
 @pytest.mark.asyncio
 async def test_apermutations_generates_expected_sequences() -> None:
     pipeline = aiter | apermutations()
-    result_iterator = await (["a", "b"] >> pipeline)
+    result_iterator = await (["a", "b"] > pipeline)
     assert await collect(result_iterator) == [("a", "b"), ("b", "a")]
 
 
 @pytest.mark.asyncio
 async def test_asort_returns_sorted_list() -> None:
-    result = await ([3, 1, 2] >> (aiter | asort()))
+    result = await ([3, 1, 2] > (aiter | asort()))
     assert result == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_areverse_yields_reverse_order() -> None:
     pipeline = aiter | areverse
-    result_iterator = await ([1, 2, 3] >> pipeline)
+    result_iterator = await ([1, 2, 3] > pipeline)
     assert await collect(result_iterator) == [3, 2, 1]
 
 
 @pytest.mark.asyncio
 async def test_at_appends_value() -> None:
-    result = await ([1, 2] >> (aiter | at(3)))
+    result = await ([1, 2] > (aiter | at(3)))
     assert result == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_atranspose_swaps_rows_and_columns() -> None:
-    result = await ([[1, 2], [3, 4]] >> (aiter | atranspose))
+    result = await ([[1, 2], [3, 4]] > (aiter | atranspose))
     assert result == [(1, 3), (2, 4)]
 
 
@@ -259,14 +259,14 @@ async def test_acollect_alias_matches_alist() -> None:
 @pytest.mark.asyncio
 async def test_abatched_emits_batches() -> None:
     pipeline = aiter | abatched(2)
-    result_iterator = await (range(5) >> pipeline)
+    result_iterator = await (range(5) > pipeline)
     assert await collect(result_iterator) == [(0, 1), (2, 3), (4,)]
 
 
 @pytest.mark.asyncio
 async def test_atee_echoes_items(capsys) -> None:
     pipeline = aiter | atee
-    result_iterator = await (["a", "b"] >> pipeline)
+    result_iterator = await (["a", "b"] > pipeline)
     assert await collect(result_iterator) == ["a", "b"]
     captured = capsys.readouterr().out.splitlines()
     assert captured == ["'a'", "'b'"]
@@ -276,48 +276,48 @@ async def test_atee_echoes_items(capsys) -> None:
 async def test_atraverse_flattens_nested_structures() -> None:
     nested = [1, [2, [3, 4]], 5]
     pipeline = aiter | atraverse
-    result_iterator = await (nested >> pipeline)
+    result_iterator = await (nested > pipeline)
     assert await collect(result_iterator) == [1, 2, 3, 4, 5]
 
 
 @pytest.mark.asyncio
 async def test_agroupby_matches_sync_behaviour() -> None:
     items = ["apple", "apricot", "banana"]
-    result = await (items >> (aiter | agroupby(lambda word: word[0])))
+    result = await (items > (aiter | agroupby(lambda word: word[0])))
     assert result == [("a", ["apple", "apricot"]), ("b", ["banana"])]
 
 
 @pytest.mark.asyncio
 async def test_achain_flattens_streams() -> None:
     pipeline = aiter | achain
-    result_iterator = await ([[1, 2], [3]] >> pipeline)
+    result_iterator = await ([[1, 2], [3]] > pipeline)
     assert await collect(result_iterator) == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_achain_with_appends_iterables() -> None:
     pipeline = aiter | achain_with([3, 4])
-    result_iterator = await ([1, 2] >> pipeline)
+    result_iterator = await ([1, 2] > pipeline)
     assert await collect(result_iterator) == [1, 2, 3, 4]
 
 
 @pytest.mark.asyncio
 async def test_aislice_returns_slice() -> None:
-    result = await (range(5) >> (aiter | aislice(1, 4)))
+    result = await (range(5) > (aiter | aislice(1, 4)))
     assert result == [1, 2, 3]
 
 
 @pytest.mark.asyncio
 async def test_aenumerate_numbers_items() -> None:
     pipeline = aiter | aenumerate(start=1)
-    result_iterator = await (["a", "b"] >> pipeline)
+    result_iterator = await (["a", "b"] > pipeline)
     assert await collect(result_iterator) == [(1, "a"), (2, "b")]
 
 
 @pytest.mark.asyncio
 async def test_aizip_combines_streams() -> None:
     pipeline = aiter | aizip(["a", "b"], [True, False])
-    result_iterator = await ([1, 2] >> pipeline)
+    result_iterator = await ([1, 2] > pipeline)
     assert await collect(result_iterator) == [(1, "a", True), (2, "b", False)]
 
 
@@ -338,7 +338,7 @@ async def test_anetcat_round_trip():
 
     async with server:
         pipeline = aiter | anetcat(host, port)
-        result_iterator = await ([b"hello", b"world"] >> pipeline)
+        result_iterator = await ([b"hello", b"world"] > pipeline)
         responses = await collect(result_iterator)
 
     assert b"".join(received) == b"helloworld"
@@ -438,7 +438,7 @@ def test_async_iter_operator_requires_parameters() -> None:
 @pytest.mark.asyncio
 async def test_abatched_requires_positive_size() -> None:
     pipeline = aiter | abatched(0)
-    iterator = await ([1, 2] >> pipeline)
+    iterator = await ([1, 2] > pipeline)
     with pytest.raises(ValueError):
         async for _ in iterator:
             pass
@@ -447,7 +447,7 @@ async def test_abatched_requires_positive_size() -> None:
 @pytest.mark.asyncio
 async def test_atraverse_preserves_strings() -> None:
     pipeline = aiter | atraverse
-    iterator = await (["ab"] >> pipeline)
+    iterator = await (["ab"] > pipeline)
     assert await collect(iterator) == ["ab"]
 
 

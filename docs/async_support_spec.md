@@ -22,7 +22,7 @@
 - `class AsyncPbPair(AsyncPb)`:
   - Wrap non-async operands using an adapter that turns any `Pb` into `AsyncPb` by delegating to its synchronous `__rrshift__`.
   - `async def __rrshift__(self, data): return await self.right.__rrshift__(await self.left.__rrshift__(data))`.
-- Threading syntax: `await (value >> async_pipeline)`; `__rshift__` should return a coroutine object.
+- Threading syntax: `await (value > async_pipeline)`; the existing `>` entry point should return a coroutine object when the pipeline is async.
 
 ## Adapters and Mixing Rules
 - `wrap_sync_as_async(pb_instance)` returning an `AsyncPb` that calls the sync operator and returns its result (no implicit threadpool).
@@ -36,5 +36,5 @@
 ## Documentation & Tests
 - Add README/md examples for `apb`.
 - Provide pytest coverage using `pytest.mark.asyncio`:
-  - Scalar pipelines (`await (value >> apb_op)`).
+- Scalar pipelines (`await (value > apb_op)`).
   - Mixed sync/async operators via `apb`.

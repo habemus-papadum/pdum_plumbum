@@ -33,14 +33,14 @@ def test_pb_to_function():
 @pytest.mark.asyncio
 async def test_async_pipeline_composition():
     pipeline = async_double | async_double
-    result = await (3 >> pipeline)
+    result = await (3 > pipeline)
     assert result == 12
 
 
 @pytest.mark.asyncio
 async def test_async_pipeline_mixing_pb():
     pipeline = async_double | add_one | async_double
-    result = await (2 >> pipeline)
+    result = await (2 > pipeline)
     assert result == 10
 
 
@@ -48,7 +48,7 @@ async def test_async_pipeline_mixing_pb():
 async def test_async_pair_repr():
     pair = AsyncPbPair(async_double, async_double)
     assert "async" in repr(pair)
-    result = await (5 >> pair)
+    result = await (5 > pair)
     assert result == 20
 
 
@@ -66,7 +66,7 @@ async def test_asyncpbfunc_normalizes_arguments(pipeline: Any, expected: int) ->
         return await func(value)
 
     op = apply(pipeline)
-    result = await (3 >> op)
+    result = await (3 > op)
     assert result == expected
 
 
@@ -82,7 +82,7 @@ async def test_sync_operator_is_adapted_to_async() -> None:
         return value + 1
 
     async_op = ensure_async_pb(add_one)
-    result = await (5 >> async_op)
+    result = await (5 > async_op)
     assert result == 6
 
 
@@ -103,7 +103,7 @@ def test_apb_returns_asyncpb_when_given_asyncpb() -> None:
 async def test_asyncpb_ror_creates_pair() -> None:
     pair = async_double.__ror__(add_one)
     assert isinstance(pair, AsyncPbPair)
-    result = await (2 >> pair)
+    result = await (2 > pair)
     assert result == 6
 
 
@@ -117,7 +117,7 @@ async def test_sync_to_async_adapter_handles_coroutines() -> None:
         return inner()
 
     adapter = ensure_async_pb(call_async)
-    assert await (3 >> adapter) == 8
+    assert await (3 > adapter) == 8
 
 
 @pytest.mark.asyncio
@@ -126,7 +126,7 @@ async def test_ensure_async_pb_accepts_plain_callable() -> None:
         return value * value
 
     op = ensure_async_pb(plain)
-    assert await (4 >> op) == 16
+    assert await (4 > op) == 16
 
 
 @pytest.mark.asyncio

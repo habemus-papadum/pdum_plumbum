@@ -196,7 +196,7 @@ These utilities will underpin the operators.
        )
        | chain
    )
-   data >> pipeline
+   data > pipeline
    ```
 
 2. **Flatten nested arrays with lineage (#3)**
@@ -230,7 +230,7 @@ These utilities will underpin the operators.
    index_users = pb(lambda left, users: left | set_value("user", users.get(left["user_id"], {})))
 
    pipeline = (
-       pb(lambda records, users: records >> select(index_users(users)))
+      pb(lambda records, users: records > select(index_users(users)))
    )
    ```
 
