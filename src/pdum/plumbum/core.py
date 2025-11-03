@@ -46,9 +46,17 @@ class Pb(ABC):
         return self._thread(data)
 
     def __or__(self, other: "Pb | Any") -> "Pb":
+        from .async_pipeline import AsyncPb, AsyncPbPair, ensure_async_pb
+
+        if isinstance(other, AsyncPb):
+            return AsyncPbPair(ensure_async_pb(self), other)
         return PbPair(self, other)
 
     def __ror__(self, other: "Pb | Any") -> "Pb":
+        from .async_pipeline import AsyncPb, AsyncPbPair, ensure_async_pb
+
+        if isinstance(other, AsyncPb):
+            return AsyncPbPair(other, ensure_async_pb(self))
         return PbPair(other, self)
 
     def __rrshift__(self, data: Any) -> Any:

@@ -19,7 +19,7 @@ nav:
   - Home: index.md
   - Tutorial: tutorial.ipynb
   - Topics:
-      - Iterable Operators: issues_operator_topics.ipynb
+      - Iterable Operators: topics/issues_operator_topics.ipynb
       - jq Clone: topics/jq_cheatsheet.ipynb
   - API:
       - Core Pipelines: api/core.md

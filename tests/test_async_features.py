@@ -153,3 +153,24 @@ def test_async_chained_greater_with_callable_raises_helpful_error() -> None:
     message = str(excinfo.value)
     assert "parentheses" in message
     assert "object of type function" in message
+
+
+@pytest.mark.asyncio
+async def test_sync_then_async_pipeline_executes_in_order() -> None:
+    pipeline = add_one | add_one | async_double | async_double
+    result = await (3 > pipeline)
+    assert result == 20
+
+
+@pytest.mark.asyncio
+async def test_async_then_sync_pipeline_executes_in_order() -> None:
+    pipeline = async_double | add_one
+    result = await (3 > pipeline)
+    assert result == 7
+
+
+@pytest.mark.asyncio
+async def test_mixed_pipeline_matches_notebook_case() -> None:
+    pipeline = add_one | add_one | add_one | async_double | async_double | async_double
+    result = await (3 > pipeline)
+    assert result == 48

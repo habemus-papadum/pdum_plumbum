@@ -15,12 +15,14 @@ from pdum.plumbum.aiterops import (
     abatched,
     achain,
     achain_with,
+    acollect,
     adedup,
     aenumerate,
     agroupby,
     aislice,
     aiter,
     aizip,
+    alist,
     anetcat,
     apermutations,
     areverse,
@@ -238,6 +240,20 @@ async def test_at_appends_value() -> None:
 async def test_atranspose_swaps_rows_and_columns() -> None:
     result = await ([[1, 2], [3, 4]] >> (aiter | atranspose))
     assert result == [(1, 3), (2, 4)]
+
+
+@pytest.mark.asyncio
+async def test_alist_collects_items() -> None:
+    pipeline = aiter | alist
+    result = await ([1, 2, 3] > pipeline)
+    assert result == [1, 2, 3]
+
+
+@pytest.mark.asyncio
+async def test_acollect_alias_matches_alist() -> None:
+    pipeline = aiter | acollect
+    result = await (async_source([4, 5, 6]) > pipeline)
+    assert result == [4, 5, 6]
 
 
 @pytest.mark.asyncio

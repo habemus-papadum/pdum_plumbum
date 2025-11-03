@@ -195,6 +195,25 @@ async def at(iterator: AsyncIterator[T], value: T) -> list[T]:
 
 
 @async_iter_operator
+async def alist(iterator: AsyncIterator[T]) -> list[T]:
+    """
+    Collect all items from ``iterator`` into a list.
+
+    Parameters
+    ----------
+    iterator
+        Source async iterator to exhaust.
+
+    Returns
+    -------
+    list[T]
+        List containing every item produced by ``iterator``.
+    """
+
+    return [item async for item in iterator]
+
+
+@async_iter_operator
 async def atranspose(iterator: AsyncIterator[Iterable[T]]) -> list[tuple[T, ...]]:
     """Transpose rows and columns of the provided iterables."""
 
@@ -351,6 +370,7 @@ async def aenumerate(iterator: AsyncIterator[T], start: int = 0) -> AsyncIterato
 
 amap = aselect
 afilter = awhere
+acollect = alist
 
 
 __all__ = [
@@ -371,6 +391,7 @@ __all__ = [
     "asort",
     "areverse",
     "at",
+    "alist",
     "atranspose",
     "abatched",
     "atee",
@@ -384,4 +405,5 @@ __all__ = [
     "aenumerate",
     "amap",
     "afilter",
+    "acollect",
 ]
