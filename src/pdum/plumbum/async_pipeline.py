@@ -34,7 +34,7 @@ class AsyncPb(ABC):
         return AsyncPbPair(other, self)
 
     async def __rrshift__(self, data: Any) -> Any:
-        return await self._thread(data)
+        raise TypeError("The '>>' threading operator has been removed. Use 'await (value > operator)' instead.")
 
     @abstractmethod
     async def _thread(self, data: Any) -> Any: ...

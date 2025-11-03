@@ -59,7 +59,7 @@ class Pb(ABC):
         return PbPair(other, self)
 
     def __rrshift__(self, data: Any) -> Any:
-        return self._thread(data)
+        raise TypeError("The '>>' threading operator has been removed. Use 'value > operator' instead.")
 
     @abstractmethod
     def _thread(self, data: Any) -> Any: ...
