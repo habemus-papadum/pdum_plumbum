@@ -326,6 +326,15 @@ Point(1, 2) >> translate(5, 3)  # Point(6, 5)
 
 The data simply flows through your functions—plumbum is purely a **syntax wrapper** around normal function calls.
 
+## Plumbum Style Guide
+
+- **Favor `|` for composition.** Build operators with `|` so you can refactor pipelines into reusable pieces. Use `>` sparingly—ideally once—when you finally thread data through the pipeline.
+- **Iterators remain lazy by default.** Many iterator pipelines end with another iterator; that’s normal. In tests or scripts, append a materializer such as `| list` when you need to realize the values. You do not need `pb(list)`—plain callables are auto-wrapped.
+- **Sync to async promotion is automatic.** Pipelines built from `@pb` operators seamlessly adopt async semantics when an `@apb` stage appears. Just keep composing with `|`; the resulting pipeline becomes awaitable.
+- **Await async chains.** Any pipeline that includes async operators returns a coroutine. Execute it with `await value > pipeline` (or equivalently `await pipeline(value)`).
+- **Collect async results with `alist` / `acollect`.** Finish async iterator pipelines with `| alist` (alias `| acollect`) to gather the results into a list when needed.
+- **Avoid chained `>` comparisons.** Python treats `x > a > b` as a single comparison chain, which is incompatible with plumbum operators. Prefer `x > a | b`; only write `(x > a) > b` when you intentionally need two separate execution steps.
+
 ## jq-like Operators
 
 The `pdum.plumbum.jq` module layers a minimal jq-style path syntax on top of plumbum's pipelines. Use it to navigate and transform JSON-like data structures without leaving Python:
