@@ -10,27 +10,22 @@ The project uses a modern Python toolchain with UV for dependency management.
 
 ## Important Rules
 
-### Version Management
-**NEVER modify the version number in any file.** Version numbers are managed exclusively by humans. Do not change:
-- `pyproject.toml` version field
-- `src/pdum/plumbum/__init__.py` `__version__` variable
-- Any version references in documentation
+### Versions and releases
+`ship` (habemus-papadum-ship) releases this package. The manifest carries
+`<last release>+dev` between releases; never edit a version field by hand.
+`__version__` reads the installed metadata.
 
-If you think a version change is needed, inform the user but do not make the change yourself.
+To release, ask the operator. When they agree, run the release workflow:
+`gh workflow run release.yml -f bump=minor -f dry_run=false` (run with
+`dry_run=true` first to see the plan). Do not publish from this machine.
+Do not update repositories that consume this package; their scheduled refresh
+does that. If your change needs a newer release of another of our packages,
+raise that package's floor here.
 
-### Release Management
-**ABSOLUTELY NEVER RUN THE RELEASE SCRIPT (`./scripts/release.sh`).** This is a production deployment script that:
-- Publishes the package to PyPI (affects real users)
-- Creates GitHub releases (public and permanent)
-- Pushes commits and tags to the repository
-- Triggers documentation deployment
-
-**This script should ONLY be run by a human who fully understands the consequences.** Do not:
-- Execute `./scripts/release.sh` under any circumstances
-- Suggest running it unless the user explicitly asks about the release process
-- Include it in automated workflows or scripts
-
-If the user needs to make a release, explain the process but let them run the script themselves.
+Do not commit a `path` or `editable` entry in `[tool.uv.sources]`. Do not pin
+another `habemus-papadum-*` package to an exact version without a reason on the
+same line or in `[tool.ship.pins]`. Run `uv run ship deps check` before you
+finish.
 
 ## Development Commands
 
@@ -71,12 +66,6 @@ uv run ruff format .
 uv run ruff check --fix .
 ```
 
-### Publishing
-```bash
-# Build and publish to PyPI (requires credentials)
-./scripts/publish.sh
-```
-
 ## Architecture
 
 ### Project Structure
@@ -88,7 +77,7 @@ uv run ruff check --fix .
 ### Key Constraints
 - **Python Version**: Requires Python 3.12+
 - **Dependency Management**: Uses UV exclusively; uv.lock is committed
-- **Build System**: Uses Hatch/Hatchling for building distributions
+- **Build System**: Uses Hatchling for building distributions
 
 ### Code Standards
 - **Ruff Configuration**:
@@ -137,14 +126,9 @@ The project uses GitHub Actions for CI (`.github/workflows/ci.yml`):
 - Posts coverage report as a PR comment
 
 ### Release Process
-Releases are managed by the `./scripts/release.sh` script (HUMANS ONLY):
-1. Validates git repo is clean
-2. Checks version has `-alpha` suffix
-3. Runs all validation (tests, linting)
-4. Strips `-alpha` from version for release
-5. Creates release commit and tag
-6. Publishes to PyPI
-7. Creates GitHub release
-8. Bumps to next development version with `-alpha`
-
-The release script expects versions to follow the pattern: `X.Y.Z-alpha` → `X.Y.Z` → `X.Y.(Z+1)-alpha`
+Releases run from the `release` workflow (`.github/workflows/release.yml`),
+which calls the reusable workflow in
+[ship](https://github.com/habemus-papadum/pdum_ship). It waits for CI on the
+commit, then sets the release version, builds, tests, publishes to PyPI, tags
+`habemus-papadum-plumbum-v<version>`, creates the GitHub release and restores
+the `+dev` marker. Documentation deploys on every push to `main`.

@@ -1,5 +1,7 @@
 """A plumbing syntax for Python"""
 
+from importlib.metadata import version as _dist_version
+
 from . import aiterops as _aiterops_module
 from . import iterops as _iterops_module
 from . import jq as _jq_module
@@ -72,7 +74,7 @@ from .iterops import (
     map as iter_map,
 )
 
-__version__ = "0.7.0-alpha"
+__version__ = _dist_version("habemus-papadum-plumbum")
 
 # Re-export module objects for convenience
 iterops = _iterops_module
