@@ -132,3 +132,12 @@ which calls the reusable workflow in
 commit, then sets the release version, builds, tests, publishes to PyPI, tags
 `habemus-papadum-plumbum-v<version>`, creates the GitHub release and restores
 the `+dev` marker. Documentation deploys on every push to `main`.
+
+## Weekly dependency maintenance
+
+The scheduled/manual `deps-refresh.yml` workflow uses Ship's shared refresh action.
+`[tool.ship] refresh-test` owns its explicit maintenance checks; release tests keep
+their existing scope. See [dependency maintenance](docs/dependency-maintenance.md)
+for commands, outcomes and verification limits. No package release or deployment
+is part of a dependency refresh. Keep generated reports out of Git and preserve
+human/agent edits on an existing repair PR.
